@@ -35,7 +35,7 @@ export default function Header() {
 
   return (
     <header className="p-4 bg-gray-100 flex justify-between items-center">
-      <a href="/" className="font-bold text-xl">Altura de famosos</a>
+      <Link href="/" className="font-bold text-xl">Altura de famosos</Link>
       {loading ? null : user ? (
         <div className="text-sm flex items-center gap-3">
           <span className="text-gray-800">{user.email}</span>
