@@ -4,11 +4,13 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
 
-export default async function PaginaCelebridad({
-  params,
-}: {
-  params: { slug: string }
-}) {
+type PageProps = {
+  params: {
+    slug: string
+  }
+}
+
+export default async function PaginaCelebridad({ params }: PageProps) {
   const supabase = createClient()
 
   // Obtener usuario autenticado (puede ser null si no hay sesión)
