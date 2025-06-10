@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 export default function AdminPage() {
-  const [celebridades, setCelebridades] = useState([])
+  const [celebridades, setCelebridades] = useState<any[]>([])
   const [userEmail, setUserEmail] = useState('')
   const [userId, setUserId] = useState('')
   const router = useRouter()
@@ -39,14 +39,14 @@ export default function AdminPage() {
         .limit(10)
 
       if (!error) {
-        setCelebridades(data)
+        setCelebridades(data || [])
       }
     }
 
     fetchUserAndData()
-  }, [])
+  }, [adminEmails, router])
 
-  const handleBuscar = (resultados) => {
+  const handleBuscar = (resultados: any[]) => {
     setCelebridades(resultados)
   }
 
@@ -55,7 +55,7 @@ export default function AdminPage() {
       <h1 className="text-2xl font-bold">Panel de administrador</h1>
       <p className="mb-4">Sesión activa: {userEmail}</p>
 
-      <FormAgregarCelebridad userId={userId} />
+      <FormAgregarCelebridad />
 
       <hr className="my-6" />
 

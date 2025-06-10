@@ -26,7 +26,7 @@ export default function Votacion({
   useEffect(() => {
     async function cargarDatos() {
       // 1. Traer todos los votos
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('votos')
         .select('valor, usuario_id')
         .eq('celebridad_id', celebridadId)
@@ -44,7 +44,8 @@ export default function Votacion({
       }
     }
     cargarDatos()
-  }, [celebridadId, userId, loading])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [celebridadId, userId, loading, supabase]) // ← agrega supabase aquí
 
   // Manejar voto
   const votar = async () => {

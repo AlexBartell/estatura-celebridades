@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 
 interface User {
   email: string
@@ -46,12 +47,12 @@ export default function Header() {
           </button>
         </div>
       ) : (
-        <a
+        <Link
           href="/iniciar-sesion"
           className="text-sm underline text-blue-700 hover:text-blue-900"
         >
           Iniciar sesión
-        </a>
+        </>
       )}
     </header>
   )

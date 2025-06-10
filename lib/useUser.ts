@@ -7,7 +7,7 @@ import { createClient } from './supabase'
 export interface SupabaseUser {
   id: string
   email: string
-  [key: string]: any // si necesitas más propiedades, pero lo ideal es ser estricto
+  //[key: string]: any // si necesitas más propiedades, pero lo ideal es ser estricto
 }
 
 export function useUser() {
