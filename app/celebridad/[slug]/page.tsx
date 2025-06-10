@@ -4,8 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
 
-// Agrega esto SOLO si tu proyecto lo requiere
-// export const dynamic = 'force-dynamic';
+// NO HAY NINGÚN TIPO PageProps AQUÍ
 
 export default async function PaginaCelebridad({
   params,
@@ -15,6 +14,7 @@ export default async function PaginaCelebridad({
   const supabase = createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
+
   const { data: celeb, error } = await supabase
     .from('celebridades')
     .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial')
@@ -35,20 +35,24 @@ export default async function PaginaCelebridad({
           className="w-full max-h-[500px] object-cover rounded"
         />
       )}
+
       <p className="text-gray-700">
         <strong>Altura promedio por usuarios:</strong>{' '}
         {celeb.altura_promedio ? `${celeb.altura_promedio} cm` : 'No hay votos aún'}
       </p>
+
       {user ? (
         <VotacionEstatura celebridadId={celeb.id} userId={user.id} />
       ) : (
         <p className="text-sm text-gray-500">Iniciá sesión para votar.</p>
       )}
+
       {celeb.altura_oficial && (
         <p className="text-gray-500">
           <strong>Estatura oficial:</strong> {celeb.altura_oficial} cm
         </p>
       )}
+
       <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
     </main>
   )
