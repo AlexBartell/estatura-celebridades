@@ -52,7 +52,7 @@ export default function Header() {
           className="text-sm underline text-blue-700 hover:text-blue-900"
         >
           Iniciar sesión
-        </>
+        </Link>
       )}
     </header>
   )

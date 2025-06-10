@@ -15,17 +15,15 @@ export default function Votacion({
   celebridadId: string
   userId: string
 }) {
-  const supabase = createClient()
   const [valor, setValor] = useState('')
   const [promedio, setPromedio] = useState<number | null>(null)
   const [cantidad, setCantidad] = useState<number>(0)
   const [yaVoto, setYaVoto] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Cargar datos iniciales
   useEffect(() => {
+    const supabase = createClient() // aquí adentro
     async function cargarDatos() {
-      // 1. Traer todos los votos
       const { data } = await supabase
         .from('votos')
         .select('valor, usuario_id')
@@ -35,7 +33,6 @@ export default function Votacion({
         const suma = data.reduce((acc: number, voto: Voto) => acc + parseFloat(String(voto.valor)), 0)
         setPromedio(suma / data.length)
         setCantidad(data.length)
-        // 2. Ver si este usuario ya votó
         setYaVoto(data.some((voto: Voto) => voto.usuario_id === userId))
       } else {
         setPromedio(null)
@@ -44,11 +41,10 @@ export default function Votacion({
       }
     }
     cargarDatos()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [celebridadId, userId, loading, supabase]) // ← agrega supabase aquí
+  }, [celebridadId, userId, loading])
 
-  // Manejar voto
   const votar = async () => {
+    const supabase = createClient()
     const num = parseFloat(valor)
     if (isNaN(num) || num < 100 || num > 250) {
       alert('Ingresá una estatura válida (entre 100 y 250 cm)')
@@ -76,7 +72,7 @@ export default function Votacion({
     })
     setValor('')
     setLoading(false)
-    // Promedio y estado se actualizan por el useEffect
+    // El useEffect recarga promedio y estado
   }
 
   return (

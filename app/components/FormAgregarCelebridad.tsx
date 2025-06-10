@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function FormAgregarCelebridad({ userId }: { userId: string }) {
+export default function FormAgregarCelebridad() { // <--- eliminado { userId }
   const [nombre, setNombre] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [altura, setAltura] = useState('')
@@ -53,7 +53,7 @@ export default function FormAgregarCelebridad({ userId }: { userId: string }) {
       altura_oficial: alturaNum,
       votos_total: 0,
       fecha_creacion: new Date().toISOString(),
-      // user_id: userId, // Si quieres guardar quién la crea, descomenta
+      // Si quieres guardar el usuario que crea, agrega aquí: user_id: userId,
     })
 
     if (error) {

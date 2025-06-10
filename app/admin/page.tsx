@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import FormAgregarCelebridad from '@/app/components/FormAgregarCelebridad'
 import FormActualizarAltura from '@/app/components/FormActualizarAltura'
@@ -8,13 +8,23 @@ import BuscadorCelebridades from '@/app/components/BuscadorCelebridades'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
+// Tipos explícitos
+type Celebridad = {
+  id: string
+  nombre: string
+  slug: string
+  foto_url: string | null
+  altura_promedio: number | null
+  altura_oficial: number | null
+}
+
 export default function AdminPage() {
-  const [celebridades, setCelebridades] = useState<any[]>([])
+  const [celebridades, setCelebridades] = useState<Celebridad[]>([])
   const [userEmail, setUserEmail] = useState('')
-  const [userId, setUserId] = useState('')
   const router = useRouter()
 
-  const adminEmails = ['alex.dunno@gmail.com']
+  // usar useMemo para las dependencias
+  const adminEmails = useMemo(() => ['alex.dunno@gmail.com'], [])
 
   useEffect(() => {
     const supabase = createClient()
@@ -30,7 +40,6 @@ export default function AdminPage() {
       }
 
       setUserEmail(user.email || '')
-      setUserId(user.id || '')
 
       const { data, error } = await supabase
         .from('celebridades')
@@ -38,15 +47,16 @@ export default function AdminPage() {
         .order('fecha_creacion', { ascending: false })
         .limit(10)
 
-      if (!error) {
-        setCelebridades(data || [])
+      if (!error && data) {
+        setCelebridades(data as Celebridad[])
       }
     }
 
     fetchUserAndData()
   }, [adminEmails, router])
 
-  const handleBuscar = (resultados: any[]) => {
+  // Tipar resultados
+  const handleBuscar = (resultados: Celebridad[]) => {
     setCelebridades(resultados)
   }
 
