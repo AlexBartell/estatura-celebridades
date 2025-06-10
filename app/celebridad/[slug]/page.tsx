@@ -4,19 +4,17 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
 
-type PageProps = {
-  params: {
-    slug: string
-  }
-}
+// Agrega esto SOLO si tu proyecto lo requiere
+// export const dynamic = 'force-dynamic';
 
-export default async function PaginaCelebridad({ params }: PageProps) {
+export default async function PaginaCelebridad({
+  params,
+}: {
+  params: { slug: string }
+}) {
   const supabase = createClient()
 
-  // Obtener usuario autenticado (puede ser null si no hay sesión)
   const { data: { user } } = await supabase.auth.getUser()
-
-  // Buscar la celebridad por slug
   const { data: celeb, error } = await supabase
     .from('celebridades')
     .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial')
@@ -37,25 +35,20 @@ export default async function PaginaCelebridad({ params }: PageProps) {
           className="w-full max-h-[500px] object-cover rounded"
         />
       )}
-
-      {/* Mostrar siempre la altura promedio, haya sesión o no */}
       <p className="text-gray-700">
         <strong>Altura promedio por usuarios:</strong>{' '}
         {celeb.altura_promedio ? `${celeb.altura_promedio} cm` : 'No hay votos aún'}
       </p>
-
       {user ? (
         <VotacionEstatura celebridadId={celeb.id} userId={user.id} />
       ) : (
         <p className="text-sm text-gray-500">Iniciá sesión para votar.</p>
       )}
-
       {celeb.altura_oficial && (
         <p className="text-gray-500">
           <strong>Estatura oficial:</strong> {celeb.altura_oficial} cm
         </p>
       )}
-
       <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
     </main>
   )
