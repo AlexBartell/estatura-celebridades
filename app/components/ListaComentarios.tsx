@@ -3,20 +3,41 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function ListaComentarios({ celebridadId, userId }: { celebridadId: string, userId: string }) {
+// Tipos explícitos para votos y comentarios
+interface ComentarioVoto {
+  valor: number // +1 o -1
+  usuario_id: string
+}
+
+interface Comentario {
+  id: string
+  contenido: string
+  fecha: string
+  usuario_id: string
+  comentario_votos: ComentarioVoto[]
+}
+
+interface Props {
+  celebridadId: string
+  userId: string
+}
+
+export default function ListaComentarios({ celebridadId, userId }: Props) {
   const supabase = createClient()
-  const [comentarios, setComentarios] = useState<any[]>([])
+  const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // Cargar comentarios al montar o cambiar celebridadId
   useEffect(() => {
     cargarComentarios()
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebridadId])
 
   async function cargarComentarios() {
     setLoading(true)
-    // Traer comentarios y votos
+    setError('')
+
     const { data, error } = await supabase
       .from('comentarios')
       .select(`
@@ -35,12 +56,13 @@ export default function ListaComentarios({ celebridadId, userId }: { celebridadI
       return
     }
 
-    setComentarios(data || [])
+    setComentarios((data as Comentario[]) || [])
     setLoading(false)
   }
 
-  // Votar comentario
+  // Votar comentario: +1 o -1
   async function votarComentario(comentarioId: string, valor: number) {
+    if (!userId) return
     await supabase
       .from('comentario_votos')
       .upsert(
@@ -51,7 +73,7 @@ export default function ListaComentarios({ celebridadId, userId }: { celebridadI
         },
         { onConflict: ['comentario_id', 'usuario_id'] }
       )
-    cargarComentarios()
+    await cargarComentarios()
   }
 
   if (loading) return <p>Cargando comentarios...</p>
@@ -61,17 +83,15 @@ export default function ListaComentarios({ celebridadId, userId }: { celebridadI
   return (
     <div className="space-y-4">
       {comentarios.map((comentario) => {
-        const puntaje = comentario.comentario_votos
-          ? comentario.comentario_votos.reduce((acc: number, voto: any) => acc + voto.valor, 0)
-          : 0
-
-        // Voto del usuario actual
-        const miVoto = comentario.comentario_votos?.find((v: any) => v.usuario_id === userId)?.valor ?? 0
+        // Calcular puntaje y voto propio
+        const puntaje = comentario.comentario_votos?.reduce((acc, voto) => acc + voto.valor, 0) ?? 0
+        const miVoto = comentario.comentario_votos?.find((v) => v.usuario_id === userId)?.valor ?? 0
+        const username = comentario.usuario_id ? comentario.usuario_id.slice(0, 8) + '...' : 'Anónimo'
 
         return (
           <div key={comentario.id} className="border-b pb-2">
             <div className="flex items-center gap-2 text-xs text-gray-600">
-              <span className="font-semibold">{comentario.usuario_id.slice(0, 8)}...</span>
+              <span className="font-semibold">{username}</span>
               <span>{new Date(comentario.fecha).toLocaleString()}</span>
             </div>
             <div className="my-1">{comentario.contenido}</div>
@@ -80,6 +100,7 @@ export default function ListaComentarios({ celebridadId, userId }: { celebridadI
                 disabled={miVoto === 1}
                 onClick={() => votarComentario(comentario.id, 1)}
                 className={`text-lg px-2 ${miVoto === 1 ? 'text-green-600 font-bold' : ''}`}
+                aria-label="Votar positivo"
               >
                 👍
               </button>
@@ -88,6 +109,7 @@ export default function ListaComentarios({ celebridadId, userId }: { celebridadI
                 disabled={miVoto === -1}
                 onClick={() => votarComentario(comentario.id, -1)}
                 className={`text-lg px-2 ${miVoto === -1 ? 'text-red-600 font-bold' : ''}`}
+                aria-label="Votar negativo"
               >
                 👎
               </button>

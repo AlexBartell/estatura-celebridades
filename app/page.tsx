@@ -5,22 +5,35 @@ import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
 
+// Definimos el tipo para celebridades:
+interface Celebridad {
+  id: string
+  nombre: string
+  slug: string
+  foto_url: string | null
+  altura_promedio: number | null
+  altura_oficial: number | null
+}
+
 export default function HomePage() {
-  const [celebridades, setCelebridades] = useState<any[]>([])
+  const [celebridades, setCelebridades] = useState<Celebridad[]>([])
   const [busqueda, setBusqueda] = useState('')
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ email: string } | null>(null)
   const [loading, setLoading] = useState(false)
 
   const supabase = createClient()
 
+  // Cargar usuario solo una vez
   useEffect(() => {
     const cargarUsuario = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      setUser(user ? { email: user.email } : null)
     }
     cargarUsuario()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Buscar celebridades
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       const cargarCelebridades = async () => {
@@ -36,8 +49,12 @@ export default function HomePage() {
         }
 
         const { data, error } = await query
-        if (error) console.error('Error al buscar celebridades:', error)
-        else setCelebridades(data || [])
+        if (error) {
+          console.error('Error al buscar celebridades:', error)
+          setCelebridades([])
+        } else {
+          setCelebridades((data as Celebridad[]) || [])
+        }
         setLoading(false)
       }
 
@@ -45,6 +62,7 @@ export default function HomePage() {
     }, 300)
 
     return () => clearTimeout(delayDebounceFn)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busqueda])
 
   return (
@@ -69,7 +87,7 @@ export default function HomePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {celebridades.map((celeb) => (
           <Link key={celeb.id} href={`/celebridad/${celeb.slug}`}>
-            <div className="border p-4 rounded hover:shadow-lg transition">
+            <div className="border p-4 rounded hover:shadow-lg transition cursor-pointer">
               {celeb.foto_url && (
                 <Image
                   src={celeb.foto_url}
@@ -80,7 +98,9 @@ export default function HomePage() {
                 />
               )}
               <h2 className="text-lg font-semibold">{celeb.nombre}</h2>
-              <p className="text-gray-600">Altura promedio: {celeb.altura_promedio} cm</p>
+              <p className="text-gray-600">
+                Altura promedio: {celeb.altura_promedio !== null ? `${celeb.altura_promedio} cm` : 'Sin votos'}
+              </p>
               {celeb.altura_oficial && (
                 <p className="text-gray-500 text-sm">Estatura oficial: {celeb.altura_oficial} cm</p>
               )}

@@ -3,14 +3,14 @@ import VotacionEstatura from '@/app/components/VotacionEstructura'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
-import ListaComentarios from '@/app/components/ListaComentarios'
-
 
 export default async function PaginaCelebridad({ params }: { params: { slug: string } }) {
   const supabase = createClient()
 
+  // Obtener usuario autenticado (puede ser null si no hay sesión)
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Buscar la celebridad por slug
   const { data: celeb, error } = await supabase
     .from('celebridades')
     .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial')
@@ -49,9 +49,8 @@ export default async function PaginaCelebridad({ params }: { params: { slug: str
           <strong>Estatura oficial:</strong> {celeb.altura_oficial} cm
         </p>
       )}
-<ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
 
+      <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
     </main>
   )
 }
-
