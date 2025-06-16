@@ -1,14 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
-const nextConfig = {
+  // tus configs...
   images: {
     domains: ['upload.wikimedia.org'],
   },
-}
+};
 
-module.exports = nextConfig
+export default nextConfig;

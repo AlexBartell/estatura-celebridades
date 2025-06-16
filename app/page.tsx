@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
 
-// Definimos el tipo para celebridades:
 interface Celebridad {
   id: string
   nombre: string
@@ -21,19 +20,16 @@ export default function HomePage() {
   const [user, setUser] = useState<{ email: string } | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const supabase = createClient()
+  const supabase  = createClient()
 
-  // Cargar usuario solo una vez
   useEffect(() => {
     const cargarUsuario = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setUser(user ? { email: user.email } : null)
+      setUser(user && user.email ? { email: user.email } : null)
     }
     cargarUsuario()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Buscar celebridades
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       const cargarCelebridades = async () => {
@@ -62,7 +58,6 @@ export default function HomePage() {
     }, 300)
 
     return () => clearTimeout(delayDebounceFn)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busqueda])
 
   return (

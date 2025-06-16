@@ -19,7 +19,7 @@ export default function ComentariosCelebridad({
   celebridadId: string
   userId?: string
 }) {
-  const supabase = createClient()
+  const supabase  = createClient()
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [contenido, setContenido] = useState('')
   const [loading, setLoading] = useState(false)

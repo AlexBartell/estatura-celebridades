@@ -46,26 +46,35 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
     }
 
     setLoading(true)
-    // Usar el endpoint en vez de llamar a Supabase desde el front
-    const res = await fetch('/api/votar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        celebridadId,
-        userId,
-        valor: alturaNum,
-      }),
-    })
-    const data = await res.json()
 
-    if (!data.ok) {
-      setMensaje(data.error || 'Error al guardar tu voto. Puede que ya hayas votado.')
+    // Prevenir doble voto en frontend
+    const { data: yaExiste } = await supabase
+      .from('votos')
+      .select('id')
+      .eq('celebridad_id', celebridadId)
+      .eq('usuario_id', userId)
+      .maybeSingle()
+
+    if (yaExiste) {
+      setMensaje('Ya has votado por esta celebridad.')
+      setLoading(false)
+      setYaVoto(true)
+      return
+    }
+
+    const { error } = await supabase.from('votos').insert({
+      celebridad_id: celebridadId,
+      usuario_id: userId,
+      valor: alturaNum,
+    })
+
+    if (error) {
+      setMensaje('Error al guardar tu voto.')
       setLoading(false)
       return
     }
 
-    setYaVoto(true)
-    setAlturaPromedio(data.promedio ?? null)
+    await cargarDatos()
     setMensaje('¡Voto registrado! Gracias por participar.')
     setAltura('')
     setLoading(false)

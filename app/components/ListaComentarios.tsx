@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-// Tipos explícitos para votos y comentarios
 interface ComentarioVoto {
-  valor: number // +1 o -1
+  valor: number
   usuario_id: string
 }
 
@@ -23,12 +22,11 @@ interface Props {
 }
 
 export default function ListaComentarios({ celebridadId, userId }: Props) {
-  const supabase = createClient()
+  const supabase  = createClient()
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Cargar comentarios al montar o cambiar celebridadId
   useEffect(() => {
     cargarComentarios()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,7 +69,7 @@ export default function ListaComentarios({ celebridadId, userId }: Props) {
           usuario_id: userId,
           valor,
         },
-        { onConflict: ['comentario_id', 'usuario_id'] }
+        { onConflict: 'comentario_id,usuario_id' }
       )
     await cargarComentarios()
   }
@@ -83,7 +81,6 @@ export default function ListaComentarios({ celebridadId, userId }: Props) {
   return (
     <div className="space-y-4">
       {comentarios.map((comentario) => {
-        // Calcular puntaje y voto propio
         const puntaje = comentario.comentario_votos?.reduce((acc, voto) => acc + voto.valor, 0) ?? 0
         const miVoto = comentario.comentario_votos?.find((v) => v.usuario_id === userId)?.valor ?? 0
         const username = comentario.usuario_id ? comentario.usuario_id.slice(0, 8) + '...' : 'Anónimo'

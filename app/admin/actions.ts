@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 
 export async function actualizarAlturaOficial(id: string, altura: number) {
-  const supabase = createClient()
+  const supabase  = await createClient()
 
   const { error } = await supabase
     .from('celebridades')

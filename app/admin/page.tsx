@@ -1,45 +1,36 @@
+// app/admin/page.tsx
+
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import FormAgregarCelebridad from '@/app/components/FormAgregarCelebridad'
 import FormActualizarAltura from '@/app/components/FormActualizarAltura'
-import BuscadorCelebridades from '@/app/components/BuscadorCelebridades'
+import BuscadorCelebridades, { Celebridad } from '@/app/components/BuscadorCelebridades'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-
-// Tipos explícitos
-type Celebridad = {
-  id: string
-  nombre: string
-  slug: string
-  foto_url: string | null
-  altura_promedio: number | null
-  altura_oficial: number | null
-}
 
 export default function AdminPage() {
   const [celebridades, setCelebridades] = useState<Celebridad[]>([])
   const [userEmail, setUserEmail] = useState('')
   const router = useRouter()
 
-  // usar useMemo para las dependencias
-  const adminEmails = useMemo(() => ['alex.dunno@gmail.com'], [])
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const supabase = createClient()
+    const supabase  = createClient()
+    const adminEmails = ['alex.dunno@gmail.com']
 
     const fetchUserAndData = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (!user || !adminEmails.includes(user.email)) {
+      if (!user || !user.email || !adminEmails.includes(user.email)) {
         router.push('/')
         return
       }
 
-      setUserEmail(user.email || '')
+      setUserEmail(user.email)
 
       const { data, error } = await supabase
         .from('celebridades')
@@ -48,14 +39,13 @@ export default function AdminPage() {
         .limit(10)
 
       if (!error && data) {
-        setCelebridades(data as Celebridad[])
+        setCelebridades(data)
       }
     }
 
     fetchUserAndData()
-  }, [adminEmails, router])
+  }, [router])
 
-  // Tipar resultados
   const handleBuscar = (resultados: Celebridad[]) => {
     setCelebridades(resultados)
   }
@@ -96,7 +86,8 @@ export default function AdminPage() {
             <p className="text-sm text-gray-600 mb-2">
               Altura promedio por usuarios: {celeb.altura_promedio ?? 'No hay votos'} cm
             </p>
-            <FormActualizarAltura id={celeb.id} alturaActual={celeb.altura_oficial} />
+            <FormActualizarAltura id={celeb.id} alturaActual={celeb.altura_oficial ?? null} />
+
           </div>
         ))}
       </div>

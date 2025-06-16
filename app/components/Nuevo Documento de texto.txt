@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function VotacionEstatura({ userId }: { userId: string }) {
-  const supabase = createClient()
+  const supabase  = await createClient()
   const { slug } = useParams()
   const [altura, setAltura] = useState('')
   const [mensaje, setMensaje] = useState('')

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function AuthCallback() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase  = createClient()
 
   useEffect(() => {
     const fn = async () => {

@@ -22,7 +22,7 @@ export default function Votacion({
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const supabase = createClient() // aquí adentro
+    const supabase  = createClient() // aquí adentro
     async function cargarDatos() {
       const { data } = await supabase
         .from('votos')
@@ -44,7 +44,7 @@ export default function Votacion({
   }, [celebridadId, userId, loading])
 
   const votar = async () => {
-    const supabase = createClient()
+    const supabase  = createClient()
     const num = parseFloat(valor)
     if (isNaN(num) || num < 100 || num > 250) {
       alert('Ingresá una estatura válida (entre 100 y 250 cm)')

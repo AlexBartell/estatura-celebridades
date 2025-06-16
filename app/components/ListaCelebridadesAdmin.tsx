@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 interface Celebridad {
   id: string
@@ -14,6 +14,7 @@ interface Celebridad {
 }
 
 export default function ListaCelebridadesAdmin() {
+  const supabase  = createClient()
   const [celebridades, setCelebridades] = useState<Celebridad[]>([])
   const [busqueda, setBusqueda] = useState('')
   const [pagina, setPagina] = useState(1)

@@ -30,7 +30,7 @@ export default function FormAgregarCelebridad() { // <--- eliminado { userId }
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
 
-    const supabase = createClient()
+    const supabase  = await createClient()
 
     setLoading(true)
     // Chequear si existe

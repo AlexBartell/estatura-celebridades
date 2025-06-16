@@ -4,13 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
 
-// NO HAY NINGÚN TIPO PageProps AQUÍ
-
-export default async function PaginaCelebridad({
-  params,
-}: {
-  params: { slug: string }
-}) {
+export default async function Page({ params }: { params: { slug: string } }) {
   const supabase = createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

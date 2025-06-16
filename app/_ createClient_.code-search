@@ -1,0 +1,107 @@
+# Query: = createClient(
+# ContextLines: 1
+
+21 results - 19 files
+
+app\page.tsx:
+  22  
+  23:   const supabase = await createClient()
+  24  
+
+app\admin\actions.ts:
+  4  export async function actualizarAlturaOficial(id: string, altura: number) {
+  5:   const supabase = await createClient()
+  6  
+
+app\admin\page.tsx:
+  19    useEffect(() => {
+  20:     const supabase = await createClient()
+  21      const adminEmails = ['alex.dunno@gmail.com']
+
+app\api\votar\route.ts:
+  5  export async function POST(req: Request) {
+  6:   const supabase = await createClient()
+  7    const { celebridadId, userId, valor } = await req.json()
+
+app\auth\callback\page.tsx:
+  7    const router = useRouter()
+  8:   const supabase = await createClient()
+  9  
+
+app\celebridad\[slug]\page.tsx:
+  8  export default async function PaginaCelebridad({ params }: any) {
+  9:   const supabase = await createClient()
+  10  
+
+app\celebridad\[slug]\Votacion.tsx:
+  24    useEffect(() => {
+  25:     const supabase = await createClient() // aquí adentro
+  26      async function cargarDatos() {
+
+  46    const votar = async () => {
+  47:     const supabase = await createClient()
+  48      const num = parseFloat(valor)
+
+app\components\BuscadorCelebridades.tsx:
+  26      setLoading(true)
+  27:     const supabase = await createClient()
+  28      const { data, error } = await supabase
+
+app\components\ComentariosCelebridad.tsx:
+  21  }) {
+  22:   const supabase = await createClient()
+  23    const [comentarios, setComentarios] = useState<Comentario[]>([])
+
+app\components\ComentarioVoto.tsx:
+  12  export default function ComentarioVoto({ comentarioId, userId, valor, onVotado }: Props) {
+  13:   const supabase = await createClient()
+  14  
+
+app\components\FormAgregarCelebridad.tsx:
+  32  
+  33:     const supabase = await createClient()
+  34  
+
+app\components\Header.tsx:
+  17    useEffect(() => {
+  18:     const supabase = await createClient()
+  19  
+
+  29    const cerrarSesion = async () => {
+  30:     const supabase = await createClient()
+  31      await supabase.auth.signOut()
+
+app\components\ListaCelebridadesAdmin.tsx:
+  16  export default function ListaCelebridadesAdmin() {
+  17:   const supabase = await createClient()
+  18    const [celebridades, setCelebridades] = useState<Celebridad[]>([])
+
+app\components\ListaComentarios.tsx:
+  24  export default function ListaComentarios({ celebridadId, userId }: Props) {
+  25:   const supabase = await createClient()
+  26    const [comentarios, setComentarios] = useState<Comentario[]>([])
+
+app\components\Nuevo Documento de texto.txt:
+  7  export default function VotacionEstatura({ userId }: { userId: string }) {
+  8:   const supabase = await createClient()
+  9    const { slug } = useParams()
+
+app\components\VotacionEstructura.tsx:
+  6  export default function VotacionEstatura({ celebridadId, userId }: { celebridadId: string, userId: string }) {
+  7:   const supabase = await createClient()
+  8    const [altura, setAltura] = useState('')
+
+app\iniciar-sesion\page.tsx:
+  7    const router = useRouter()
+  8:   const supabase = await createClient() // ✅ Ahora está disponible en toda la función
+  9  
+
+lib\supabase.ts:
+  2  
+  3: export const supabase = await createClient(
+  4    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+
+lib\useUser.ts:
+  17    useEffect(() => {
+  18:     const supabase = await createClient()
+  19  

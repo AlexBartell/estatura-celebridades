@@ -15,7 +15,7 @@ export default function Header() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const supabase = createClient()
+    const supabase  = createClient()
 
     async function getUser() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +27,7 @@ export default function Header() {
   }, [])
 
   const cerrarSesion = async () => {
-    const supabase = createClient()
+    const supabase  = createClient()
     await supabase.auth.signOut()
     // Mejor UX: recarga después de cerrar sesión exitosamente
     window.location.href = '/'
