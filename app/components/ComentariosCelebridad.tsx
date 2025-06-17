@@ -9,9 +9,12 @@ interface Comentario {
   contenido: string
   fecha: string
   usuario_id: string
-  usuario?: { username: string | null }   // ← Relación de supabase
+  usuario?: { username: string | null }
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
+
+// Tipo de dato devuelto por Supabase para la relación
+type ComentarioDB = Comentario & { usuario: { username: string | null }[] | null }
 
 export default function ComentariosCelebridad({
   celebridadId,
@@ -26,7 +29,7 @@ export default function ComentariosCelebridad({
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
 
-  // Traer comentarios con username
+  // Traer comentarios con username de la tabla usuarios
   const cargarComentarios = async () => {
     const { data, error } = await supabase
       .from('comentarios')
@@ -38,27 +41,24 @@ export default function ComentariosCelebridad({
         usuario (
           username
         ),
-        comentario_votos (
-          valor,
-          usuario_id
-        )
+        comentario_votos (valor, usuario_id)
       `)
       .eq('celebridad_id', celebridadId)
       .order('fecha', { ascending: false })
 
     if (error) {
-  setMensaje('Error cargando comentarios')
-  setComentarios([])
-} else {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setComentarios(
-    (data ?? []).map((c: any) => ({
-      ...c,
-      usuario: c.usuario && Array.isArray(c.usuario) ? c.usuario[0] : c.usuario
-    }))
-  )
-  setMensaje('')
-} 
+      setMensaje('Error cargando comentarios')
+      setComentarios([])
+    } else {
+      // Normalizá la relación: usuario siempre como objeto o null
+      setComentarios(
+        (data ?? []).map((c: ComentarioDB) => ({
+          ...c,
+          usuario: c.usuario && Array.isArray(c.usuario) ? c.usuario[0] : c.usuario
+        }))
+      )
+      setMensaje('')
+    }
   }
 
   useEffect(() => {
