@@ -47,12 +47,17 @@ export default function ComentariosCelebridad({
       .order('fecha', { ascending: false })
 
     if (error) {
-      setMensaje('Error cargando comentarios')
-      setComentarios([])
-    } else {
-      setComentarios(data ?? [])
-      setMensaje('')
-    }
+  setMensaje('Error cargando comentarios')
+  setComentarios([])
+} else {
+  setComentarios(
+    (data ?? []).map((c: any) => ({
+      ...c,
+      usuario: c.usuario && Array.isArray(c.usuario) ? c.usuario[0] : c.usuario
+    }))
+  )
+  setMensaje('')
+} 
   }
 
   useEffect(() => {
