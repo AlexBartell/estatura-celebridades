@@ -26,9 +26,11 @@ export default function FormAgregarCelebridad() { // <--- eliminado { userId }
     }
 
     const slug = nombre
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, '-')
+  .replace(/[^a-z0-9-]/g, '');
 
     const supabase  = await createClient()
 
