@@ -1,4 +1,3 @@
-// /lib/supabase/useOrCreateUsername.ts
 import { createClient } from "@/lib/supabase/client";
 
 // Genera un username random, ej: usuario_x8fj3
@@ -9,7 +8,7 @@ function generarUsername(email: string) {
 
 export async function getOrCreateUsername(userId: string, email: string) {
   const supabase = createClient();
-  const { data: user, error } = await supabase
+  const { data: user } = await supabase
     .from("usuarios")
     .select("*")
     .eq("id", userId)
