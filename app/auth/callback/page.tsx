@@ -17,7 +17,7 @@ export default function AuthCallback() {
         router.push('/iniciar-sesion') // o la ruta de login que uses
         return
       }
-
+const username = await getOrCreateUsername(user.id)
       // Si es admin, va a /admin
       if (user.email === 'alex.dunno@gmail.com') {
         router.push('/admin')
@@ -25,7 +25,7 @@ export default function AuthCallback() {
       }
 
       // Chequear si ya tiene username (en tabla usuarios)
-      const username = await getOrCreateUsername(user.id)
+      
       if (!username) {
         router.push('/elige-nombre')
       } else {

@@ -9,6 +9,7 @@ interface Comentario {
   contenido: string
   fecha: string
   usuario_id: string
+  usuario?: { username: string | null }      // ← Nuevo: username real
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
@@ -25,7 +26,7 @@ export default function ComentariosCelebridad({
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
 
-  // Traer comentarios con votos al cargar el componente
+  // Traer comentarios con username de la tabla usuarios
   const cargarComentarios = async () => {
     const { data, error } = await supabase
       .from('comentarios')
@@ -35,6 +36,7 @@ export default function ComentariosCelebridad({
           contenido,
           fecha,
           usuario_id,
+          usuario:usuarios(username),       -- join y alias
           comentario_votos (valor, usuario_id)
         `
       )
@@ -88,8 +90,15 @@ export default function ComentariosCelebridad({
         const dislikes = c.comentario_votos?.filter(v => v.valor === -1).length || 0
         return (
           <div key={c.id} className="border-b pb-2 mb-2">
+            <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+              <span className="font-semibold">
+                {c.usuario?.username
+                  ? c.usuario.username
+                  : c.usuario_id.slice(0, 8) + '...'}
+              </span>
+              <span>{new Date(c.fecha).toLocaleString()}</span>
+            </div>
             <p className="text-gray-800">{c.contenido}</p>
-            <p className="text-xs text-gray-500">{new Date(c.fecha).toLocaleString()}</p>
             <div className="flex items-center gap-4 mt-1">
               <span>{likes} 👍</span>
               <span>{dislikes} 👎</span>
