@@ -9,7 +9,7 @@ interface Comentario {
   contenido: string
   fecha: string
   usuario_id: string
-  usuarios?: { username: string | null }[]     // ← Ahora array
+  usuario?: { username: string | null }   // ← Relación de supabase
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
@@ -20,35 +20,34 @@ export default function ComentariosCelebridad({
   celebridadId: string
   userId?: string
 }) {
-  const supabase  = createClient()
+  const supabase = createClient()
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [contenido, setContenido] = useState('')
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
 
-  // Traer comentarios con username de la tabla usuarios
+  // Traer comentarios con username
   const cargarComentarios = async () => {
     const { data, error } = await supabase
-  .from('comentarios')
-  .select(`
-    id,
-    contenido,
-    fecha,
-    usuario_id,
-    usuarios (
-      username
-    ),
-    comentario_votos (
-      valor,
-      usuario_id
-    )
-  `)
-  .eq('celebridad_id', celebridadId)
-  .order('fecha', { ascending: false })
-
+      .from('comentarios')
+      .select(`
+        id,
+        contenido,
+        fecha,
+        usuario_id,
+        usuario (
+          username
+        ),
+        comentario_votos (
+          valor,
+          usuario_id
+        )
+      `)
+      .eq('celebridad_id', celebridadId)
+      .order('fecha', { ascending: false })
 
     if (error) {
-      setMensaje('Error cargando comentarios: ' + error.message)
+      setMensaje('Error cargando comentarios')
       setComentarios([])
     } else {
       setComentarios(data ?? [])
@@ -96,10 +95,10 @@ export default function ComentariosCelebridad({
           <div key={c.id} className="border-b pb-2 mb-2">
             <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
               <span className="font-semibold">
-  {c.usuarios?.[0]?.username
-    ? c.usuarios[0].username
-    : c.usuario_id.slice(0, 8) + '...'}
-</span>
+                {c.usuario?.username
+                  ? c.usuario.username
+                  : c.usuario_id.slice(0, 8) + '...'}
+              </span>
               <span>{new Date(c.fecha).toLocaleString()}</span>
             </div>
             <p className="text-gray-800">{c.contenido}</p>
