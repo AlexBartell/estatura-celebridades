@@ -35,10 +35,8 @@ export default function ComentariosCelebridad({
     contenido,
     fecha,
     usuario_id,
-    usuarios (
-      username
-    ),
-    comentario_votos (valor, usuario_id)
+    usuarios?: { username: string | null } // ← en plural!
+  comentario_votos?: { valor: number; usuario_id: string }[]
   `)
   .eq('celebridad_id', celebridadId)
   .order('fecha', { ascending: false })
