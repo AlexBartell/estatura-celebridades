@@ -22,7 +22,7 @@ export default function LoginPage() {
       }
 
       // Chequea si ya tiene username (pasa user.id y user.email)
-      const username = await getOrCreateUsername(user.id, user.email ?? '')
+      const username = await getOrCreateUsername(user.id)
       if (!username) {
         router.push('/elige-nombre')
       } else {
