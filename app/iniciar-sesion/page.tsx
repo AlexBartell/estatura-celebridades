@@ -2,30 +2,19 @@
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { getOrCreateUsername } from '@/lib/supabase/useOrCreateUsername'
 
 export default function LoginPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase  = createClient() // ✅ Ahora está disponible en toda la función
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      const userEmail = session?.user?.email
 
-      if (!user) return
-
-      // Primero chequea si es admin
-      if (user.email === 'alex.dunno@gmail.com') {
+      if (userEmail === 'alex.dunno@gmail.com') {
         router.push('/admin')
-        return
-      }
-
-      // Chequea si ya tiene username (pasa user.id y user.email)
-      const username = await getOrCreateUsername(user.id)
-      if (!username) {
-        router.push('/elige-nombre')
-      } else {
+      } else if (userEmail) {
         router.push('/')
       }
     }
@@ -37,7 +26,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://estatura-celebridades.vercel.app/auth/callback', // Para prod
+        redirectTo: 'https://estatura-celebridades.vercel.app/auth/callback', // Cambiar para producción
       },
     })
     if (error) alert('Error al iniciar sesión')

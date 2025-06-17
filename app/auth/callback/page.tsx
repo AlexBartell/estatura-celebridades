@@ -2,19 +2,32 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getOrCreateUsername } from '@/lib/supabase/useOrCreateUsername'
 
 export default function AuthCallback() {
   const router = useRouter()
-  const supabase  = createClient()
+  const supabase = createClient()
 
   useEffect(() => {
     const fn = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const { data } = await supabase.auth.getUser()
+      const user = data.user
 
-      if (user?.email === 'alex.dunno@gmail.com') {
+      if (!user) {
+        router.push('/iniciar-sesion') // o la ruta de login que uses
+        return
+      }
+
+      // Si es admin, va a /admin
+      if (user.email === 'alex.dunno@gmail.com') {
         router.push('/admin')
+        return
+      }
+
+      // Chequear si ya tiene username (en tabla usuarios)
+      const username = await getOrCreateUsername(user.id)
+      if (!username) {
+        router.push('/elige-nombre')
       } else {
         router.push('/')
       }
