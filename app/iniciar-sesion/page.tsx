@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { getOrSuggestUsername } from '@/lib/supabase/getOrSuggestUsername'
+import { getOrCreateUsername } from '@/lib/supabase/useOrCreateUsername'
 
 export default function LoginPage() {
   const router = useRouter()
