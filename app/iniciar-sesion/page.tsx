@@ -26,7 +26,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'http://localhost:3000/auth/callback', // Cambiar para producción
+        redirectTo: 'https://estatura-celebridades.vercel.app/auth/callback', // Cambiar para producción
       },
     })
     if (error) alert('Error al iniciar sesión')
