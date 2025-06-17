@@ -50,6 +50,7 @@ export default function ComentariosCelebridad({
   setMensaje('Error cargando comentarios')
   setComentarios([])
 } else {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setComentarios(
     (data ?? []).map((c: any) => ({
       ...c,
