@@ -29,22 +29,26 @@ export default function ComentariosCelebridad({
   // Traer comentarios con username de la tabla usuarios
   const cargarComentarios = async () => {
     const { data, error } = await supabase
-      .from('comentarios')
-      .select(`
-        id,
-        contenido,
-        fecha,
-        usuario_id,
-        usuarios (
-          username
-        ),
-        comentario_votos (valor, usuario_id)
-      `)
-      .eq('celebridad_id', celebridadId)
-      .order('fecha', { ascending: false })
+  .from('comentarios')
+  .select(`
+    id,
+    contenido,
+    fecha,
+    usuario_id,
+    usuarios (
+      username
+    ),
+    comentario_votos (
+      valor,
+      usuario_id
+    )
+  `)
+  .eq('celebridad_id', celebridadId)
+  .order('fecha', { ascending: false })
+
 
     if (error) {
-      setMensaje('Error cargando comentarios')
+      setMensaje('Error cargando comentarios: ' + error.message)
       setComentarios([])
     } else {
       setComentarios(data ?? [])
@@ -92,10 +96,10 @@ export default function ComentariosCelebridad({
           <div key={c.id} className="border-b pb-2 mb-2">
             <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
               <span className="font-semibold">
-                {c.usuarios && c.usuarios[0]?.username
-                  ? c.usuarios[0].username
-                  : c.usuario_id.slice(0, 8) + '...'}
-              </span>
+  {c.usuarios?.[0]?.username
+    ? c.usuarios[0].username
+    : c.usuario_id.slice(0, 8) + '...'}
+</span>
               <span>{new Date(c.fecha).toLocaleString()}</span>
             </div>
             <p className="text-gray-800">{c.contenido}</p>
