@@ -4,6 +4,16 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import ComentarioVoto from './ComentarioVoto'
 
+// Tipo devuelto por Supabase cuando hay relación 1:n (join) 
+interface ComentarioDB {
+  id: string
+  contenido: string
+  fecha: string
+  usuario_id: string
+  usuario: { username: string | null }[] | null
+  comentario_votos?: { valor: number; usuario_id: string }[]
+}
+
 interface Comentario {
   id: string
   contenido: string
@@ -12,9 +22,6 @@ interface Comentario {
   usuario?: { username: string | null }
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
-
-// Tipo de dato devuelto por Supabase para la relación
-type ComentarioDB = Comentario & { usuario: { username: string | null }[] | null }
 
 export default function ComentariosCelebridad({
   celebridadId,
@@ -50,11 +57,13 @@ export default function ComentariosCelebridad({
       setMensaje('Error cargando comentarios')
       setComentarios([])
     } else {
-      // Normalizá la relación: usuario siempre como objeto o null
       setComentarios(
-        (data ?? []).map((c: ComentarioDB) => ({
+        (data as ComentarioDB[]).map((c) => ({
           ...c,
-          usuario: c.usuario && Array.isArray(c.usuario) ? c.usuario[0] : c.usuario
+          usuario:
+            c.usuario && Array.isArray(c.usuario) && c.usuario.length > 0
+              ? c.usuario[0]
+              : { username: null }
         }))
       )
       setMensaje('')
