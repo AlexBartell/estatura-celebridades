@@ -25,18 +25,17 @@ export default function ComentariosCelebridad({
 
   const cargarComentarios = async () => {
     const { data, error } = await supabase
-      .from('comentarios')
-      .select(`
-        id,
-        contenido,
-        fecha,
-        usuario_id,
-        usuario (username),
-        usuarios (username),
-        comentario_votos (valor, usuario_id)
-      `)
-      .eq('celebridad_id', celebridadId)
-      .order('fecha', { ascending: false })
+  .from('comentarios')
+  .select(`
+    id,
+    contenido,
+    fecha,
+    usuario_id,
+    usuario(username),
+    comentario_votos(valor, usuario_id)
+  `)
+  .eq('celebridad_id', celebridadId)
+  .order('fecha', { ascending: false })
 
     if (error) {
       setMensaje('Error cargando comentarios: ' + error.message)
