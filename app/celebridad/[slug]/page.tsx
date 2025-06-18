@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import VotacionEstatura from '@/app/components/VotacionEstructura'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-//import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
+import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const supabase = createClient()
@@ -47,7 +47,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </p>
       )}
 
-    {/* <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} /> */}
+    <ComentariosCelebridad celebridadId={celeb.id} />
     </main>
   )
 }
