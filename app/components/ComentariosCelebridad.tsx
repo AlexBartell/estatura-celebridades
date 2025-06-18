@@ -13,6 +13,16 @@ interface Comentario {
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
+// Este tipo representa el resultado crudo que devuelve Supabase, donde usuarios es un array
+interface ComentarioDB {
+  id: string
+  contenido: string
+  fecha: string
+  usuario_id: string
+  usuarios: { username: string | null }[] | null
+  comentario_votos?: { valor: number; usuario_id: string }[]
+}
+
 export default function ComentariosCelebridad({
   celebridadId,
   userId
@@ -49,12 +59,13 @@ export default function ComentariosCelebridad({
     } else {
       // Normalizá la relación: usuario siempre como objeto o null
       setComentarios(
-        (data ?? []).map((c: any) => ({
-          ...c,
-          usuario:
-            c.usuarios && Array.isArray(c.usuarios)
-              ? c.usuarios[0]
-              : c.usuarios
+        (data as ComentarioDB[] ?? []).map((c): Comentario => ({
+          id: c.id,
+          contenido: c.contenido,
+          fecha: c.fecha,
+          usuario_id: c.usuario_id,
+          usuario: c.usuarios && Array.isArray(c.usuarios) ? c.usuarios[0] : null,
+          comentario_votos: c.comentario_votos
         }))
       )
       setMensaje('')
