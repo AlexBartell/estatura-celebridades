@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-// interface Comentario igual que antes...
-interface Comentario {
+// Para debug, declaramos las relaciones como opcionales y unknown
+interface ComentarioDebug {
   id: string
   contenido: string
   fecha: string
   usuario_id: string
-  usuario?: any // Para debuggear, ponelo en any, después lo tipificamos
-  usuarios?: any // idem, para debug
+  usuario?: unknown
+  usuarios?: unknown
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
@@ -20,10 +20,9 @@ export default function ComentariosCelebridad({
   celebridadId: string
 }) {
   const supabase = createClient()
-  const [comentarios, setComentarios] = useState<Comentario[]>([])
+  const [comentarios, setComentarios] = useState<ComentarioDebug[]>([])
   const [mensaje, setMensaje] = useState('')
 
-  // Traer comentarios con usuario/usuarios join para debug
   const cargarComentarios = async () => {
     const { data, error } = await supabase
       .from('comentarios')
@@ -45,14 +44,15 @@ export default function ComentariosCelebridad({
     } else {
       setComentarios(data ?? [])
       setMensaje('')
-      // Log completo para ver cómo viene:
-      console.log('DEBUG comentarios:', data)
+      // Mostrá el primer resultado en consola para debug
+      if (data && data.length > 0) {
+        console.log('DEBUG primer comentario:', data[0])
+      }
     }
   }
 
   useEffect(() => {
     cargarComentarios()
-    // No hay problema de dependencias porque la función no cambia
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebridadId])
 
@@ -63,11 +63,12 @@ export default function ComentariosCelebridad({
       {comentarios.length === 0 && (
         <p className="text-gray-500">No hay comentarios todavía.</p>
       )}
-      {comentarios.map((c, idx) => (
-        <pre key={c.id} style={{ background: '#eee', padding: 8, fontSize: 12, overflowX: 'auto' }}>
-          {JSON.stringify(c, null, 2)}
+      {/* Muestra el objeto del primer comentario para copiar aquí */}
+      {comentarios.length > 0 && (
+        <pre style={{ background: '#eee', padding: 8, fontSize: 12, overflowX: 'auto' }}>
+          {JSON.stringify(comentarios[0], null, 2)}
         </pre>
-      ))}
+      )}
     </div>
   )
 }
