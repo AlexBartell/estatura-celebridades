@@ -47,7 +47,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </p>
       )}
 
-    // <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
+    {/* <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} /> */}
     </main>
   )
 }
