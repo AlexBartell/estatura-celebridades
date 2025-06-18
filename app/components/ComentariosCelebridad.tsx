@@ -23,19 +23,19 @@ export default function ComentariosCelebridad({
   const [comentarios, setComentarios] = useState<ComentarioDebug[]>([])
   const [mensaje, setMensaje] = useState('')
 
-  const cargarComentarios = async () => {
-    const { data, error } = await supabase
+  const { data, error } = await supabase
   .from('comentarios')
   .select(`
     id,
     contenido,
     fecha,
     usuario_id,
-    usuario(username),
+    usuario_id(username),
     comentario_votos(valor, usuario_id)
   `)
   .eq('celebridad_id', celebridadId)
   .order('fecha', { ascending: false })
+
 
     if (error) {
       setMensaje('Error cargando comentarios: ' + error.message)
