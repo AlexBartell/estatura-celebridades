@@ -54,9 +54,10 @@ export default function ComentariosCelebridad({
       .order('fecha', { ascending: false })
 
     if (error) {
-      setMensaje('Error cargando comentarios')
-      setComentarios([])
-    } else {
+  console.error('Error cargando comentarios:', error);
+  setMensaje('Error cargando comentarios: ' + (error.message ?? error));
+  setComentarios([]);
+} else {
       setComentarios(
         (data as ComentarioDB[]).map((c) => ({
           ...c,
