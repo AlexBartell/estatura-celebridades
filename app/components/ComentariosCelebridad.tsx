@@ -52,6 +52,7 @@ export default function ComentariosCelebridad({
       setComentarios(data ?? [])
       setMensaje('')
       // Debug: Mostrá el array entero en consola
+      //veamos si hay mas cambios...
       console.log('Comentarios desde Supabase:', data)
     }
   }
