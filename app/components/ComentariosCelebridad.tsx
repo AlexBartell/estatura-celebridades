@@ -2,30 +2,28 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import ComentarioVoto from './ComentarioVoto'
 
+// interface Comentario igual que antes...
 interface Comentario {
   id: string
   contenido: string
   fecha: string
   usuario_id: string
-  // Pueden ser usuarios o usuario, según el join
-  usuarios?: { username: string | null }[] | null
-  usuario?: { username: string | null } | null
+  usuario?: any // Para debuggear, ponelo en any, después lo tipificamos
+  usuarios?: any // idem, para debug
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
 export default function ComentariosCelebridad({
-  celebridadId,
-  userId
+  celebridadId
 }: {
   celebridadId: string
-  userId?: string
 }) {
   const supabase = createClient()
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [mensaje, setMensaje] = useState('')
 
+  // Traer comentarios con usuario/usuarios join para debug
   const cargarComentarios = async () => {
     const { data, error } = await supabase
       .from('comentarios')
@@ -34,12 +32,8 @@ export default function ComentariosCelebridad({
         contenido,
         fecha,
         usuario_id,
-        usuarios (
-          username
-        ),
-        usuario (
-          username
-        ),
+        usuario (username),
+        usuarios (username),
         comentario_votos (valor, usuario_id)
       `)
       .eq('celebridad_id', celebridadId)
@@ -51,26 +45,29 @@ export default function ComentariosCelebridad({
     } else {
       setComentarios(data ?? [])
       setMensaje('')
-      // Debug: Mostrá el array entero en consola
-      //veamos si hay mas cambios...
-      console.log('Comentarios desde Supabase:', data)
+      // Log completo para ver cómo viene:
+      console.log('DEBUG comentarios:', data)
     }
   }
 
   useEffect(() => {
     cargarComentarios()
+    // No hay problema de dependencias porque la función no cambia
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebridadId])
 
   return (
     <div className="mt-8 space-y-4">
-      <h3 className="text-lg font-bold">Comentarios (debug)</h3>
-      {mensaje && <p>{mensaje}</p>}
-      {comentarios.length > 0 && (
-        <pre style={{ background: "#eee", fontSize: 12, padding: 8 }}>
-          {JSON.stringify(comentarios[0], null, 2)}
-        </pre>
+      <h3 className="text-lg font-bold">DEBUG Comentarios (copiame el output de abajo!)</h3>
+      {mensaje && <p className="text-red-500">{mensaje}</p>}
+      {comentarios.length === 0 && (
+        <p className="text-gray-500">No hay comentarios todavía.</p>
       )}
-      {/* El resto del render lo podés comentar si querés */}
+      {comentarios.map((c, idx) => (
+        <pre key={c.id} style={{ background: '#eee', padding: 8, fontSize: 12, overflowX: 'auto' }}>
+          {JSON.stringify(c, null, 2)}
+        </pre>
+      ))}
     </div>
   )
 }
