@@ -55,18 +55,31 @@ export default function ComentariosCelebridad({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebridadId])
 
+  // Al guardar, también guarda el username
   const manejarComentario = async () => {
     if (!contenido.trim()) {
       setMensaje('El comentario no puede estar vacío.')
       return
     }
     setLoading(true)
+
+    // Traé el username del usuario logueado
+    let username = null
+    if (userId) {
+      const { data: usuarioData } = await supabase
+        .from('usuarios')
+        .select('username')
+        .eq('id', userId)
+        .single()
+      username = usuarioData?.username || null
+    }
+
     const { error } = await supabase.from('comentarios').insert({
       celebridad_id: celebridadId,
       usuario_id: userId,
+      username,
       contenido,
       fecha: new Date().toISOString(),
-      // username: ... // ← Si querés que también el usuario pueda escribir el username acá, pasalo
     })
     if (error) {
       setMensaje('Error al guardar el comentario.')
