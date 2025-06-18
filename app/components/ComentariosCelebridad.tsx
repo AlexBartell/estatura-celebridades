@@ -4,22 +4,12 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import ComentarioVoto from './ComentarioVoto'
 
-// Tipo devuelto por Supabase cuando hay relación 1:n (join) 
-interface ComentarioDB {
-  id: string
-  contenido: string
-  fecha: string
-  usuario_id: string
-  usuario: { username: string | null }[] | null
-  comentario_votos?: { valor: number; usuario_id: string }[]
-}
-
 interface Comentario {
   id: string
   contenido: string
   fecha: string
   usuario_id: string
-  usuario?: { username: string | null }
+  usuario: { username: string | null } | null
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
@@ -45,7 +35,7 @@ export default function ComentariosCelebridad({
         contenido,
         fecha,
         usuario_id,
-        usuario (
+        usuarios (
           username
         ),
         comentario_votos (valor, usuario_id)
@@ -54,17 +44,17 @@ export default function ComentariosCelebridad({
       .order('fecha', { ascending: false })
 
     if (error) {
-  console.error('Error cargando comentarios:', error);
-  setMensaje('Error cargando comentarios: ' + (error.message ?? error));
-  setComentarios([]);
-} else {
+      setMensaje('Error cargando comentarios: ' + error.message)
+      setComentarios([])
+    } else {
+      // Normalizá la relación: usuario siempre como objeto o null
       setComentarios(
-        (data as ComentarioDB[]).map((c) => ({
+        (data ?? []).map((c: any) => ({
           ...c,
           usuario:
-            c.usuario && Array.isArray(c.usuario) && c.usuario.length > 0
-              ? c.usuario[0]
-              : { username: null }
+            c.usuarios && Array.isArray(c.usuarios)
+              ? c.usuarios[0]
+              : c.usuarios
         }))
       )
       setMensaje('')
