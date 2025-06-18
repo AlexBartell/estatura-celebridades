@@ -9,6 +9,7 @@ type Comentario = {
   contenido: string
   celebridad_id: string
   usuario_id: string | null
+  username: string | null
   fecha: string
 }
 
@@ -17,6 +18,7 @@ export default function Comentarios({ celebridadId }: { celebridadId: string }) 
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const [nuevoComentario, setNuevoComentario] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [username, setUsername] = useState<string | null>(null)
 
   useEffect(() => {
     async function cargarComentarios() {
@@ -33,6 +35,23 @@ export default function Comentarios({ celebridadId }: { celebridadId: string }) 
     cargarComentarios()
   }, [celebridadId])
 
+  // Al cargar usuario, traé el username de la tabla usuarios si está logueado
+  useEffect(() => {
+    async function traerUsername() {
+      if (user?.id) {
+        const { data } = await supabase
+          .from('usuarios')
+          .select('username')
+          .eq('id', user.id)
+          .single()
+        setUsername(data?.username || null)
+      } else {
+        setUsername(null)
+      }
+    }
+    traerUsername()
+  }, [user])
+
   const manejarEnvio = async () => {
     if (!nuevoComentario.trim()) return
 
@@ -41,6 +60,7 @@ export default function Comentarios({ celebridadId }: { celebridadId: string }) 
       contenido: nuevoComentario,
       celebridad_id: celebridadId,
       usuario_id: user?.id ?? null,
+      username: username ?? null, // ← Guardá el username acá!
     })
 
     if (!error) {
@@ -82,8 +102,12 @@ export default function Comentarios({ celebridadId }: { celebridadId: string }) 
           <li key={comentario.id} className="border-b pb-2">
             <p className="text-sm">{comentario.contenido}</p>
             <p className="text-xs text-gray-500 mt-1">
-              {comentario.usuario_id ? `Usuario: ${comentario.usuario_id.slice(0, 8)}...` : 'Anónimo'} ·{' '}
-              {new Date(comentario.fecha).toLocaleString()}
+              {comentario.username
+                ? `Usuario: ${comentario.username}`
+                : comentario.usuario_id
+                  ? `Usuario: ${comentario.usuario_id.slice(0, 8)}...`
+                  : 'Anónimo'}{' '}
+              · {new Date(comentario.fecha).toLocaleString()}
             </p>
           </li>
         ))}

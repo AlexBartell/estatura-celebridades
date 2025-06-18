@@ -2,51 +2,51 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import ComentarioVoto from './ComentarioVoto'
 
-// Para debug, declaramos las relaciones como opcionales y unknown
-interface ComentarioDebug {
+interface Comentario {
   id: string
   contenido: string
   fecha: string
-  usuario_id: string
-  usuario?: unknown
-  usuarios?: unknown
+  usuario_id: string | null
+  username: string | null
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
 export default function ComentariosCelebridad({
-  celebridadId
+  celebridadId,
+  userId
 }: {
   celebridadId: string
+  userId?: string
 }) {
   const supabase = createClient()
-  const [comentarios, setComentarios] = useState<ComentarioDebug[]>([])
+  const [comentarios, setComentarios] = useState<Comentario[]>([])
+  const [contenido, setContenido] = useState('')
+  const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
 
-  const { data, error } = await supabase
-  .from('comentarios')
-  .select(`
-    id,
-    contenido,
-    fecha,
-    usuario_id,
-    usuario_id(username),
-    comentario_votos(valor, usuario_id)
-  `)
-  .eq('celebridad_id', celebridadId)
-  .order('fecha', { ascending: false })
-
+  // Traer comentarios con votos al cargar el componente
+  const cargarComentarios = async () => {
+    const { data, error } = await supabase
+      .from('comentarios')
+      .select(`
+        id,
+        contenido,
+        fecha,
+        usuario_id,
+        username,
+        comentario_votos (valor, usuario_id)
+      `)
+      .eq('celebridad_id', celebridadId)
+      .order('fecha', { ascending: false })
 
     if (error) {
-      setMensaje('Error cargando comentarios: ' + error.message)
+      setMensaje('Error cargando comentarios')
       setComentarios([])
     } else {
       setComentarios(data ?? [])
       setMensaje('')
-      // Mostrá el primer resultado en consola para debug
-      if (data && data.length > 0) {
-        console.log('DEBUG primer comentario:', data[0])
-      }
     }
   }
 
@@ -55,18 +55,94 @@ export default function ComentariosCelebridad({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebridadId])
 
+  const manejarComentario = async () => {
+    if (!contenido.trim()) {
+      setMensaje('El comentario no puede estar vacío.')
+      return
+    }
+    setLoading(true)
+    const { error } = await supabase.from('comentarios').insert({
+      celebridad_id: celebridadId,
+      usuario_id: userId,
+      contenido,
+      fecha: new Date().toISOString(),
+      // username: ... // ← Si querés que también el usuario pueda escribir el username acá, pasalo
+    })
+    if (error) {
+      setMensaje('Error al guardar el comentario.')
+    } else {
+      setContenido('')
+      setMensaje('¡Comentario publicado!')
+      await cargarComentarios()
+    }
+    setLoading(false)
+  }
+
   return (
     <div className="mt-8 space-y-4">
-      <h3 className="text-lg font-bold">DEBUG Comentarios (copiame el output de abajo!)</h3>
-      {mensaje && <p className="text-red-500">{mensaje}</p>}
+      <h3 className="text-lg font-bold">Comentarios</h3>
       {comentarios.length === 0 && (
         <p className="text-gray-500">No hay comentarios todavía.</p>
       )}
-      {/* Muestra el objeto del primer comentario para copiar aquí */}
-      {comentarios.length > 0 && (
-        <pre style={{ background: '#eee', padding: 8, fontSize: 12, overflowX: 'auto' }}>
-          {JSON.stringify(comentarios[0], null, 2)}
-        </pre>
+      {comentarios.map((c) => {
+        const likes = c.comentario_votos?.filter(v => v.valor === 1).length || 0
+        const dislikes = c.comentario_votos?.filter(v => v.valor === -1).length || 0
+        return (
+          <div key={c.id} className="border-b pb-2 mb-2">
+            <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
+              <span className="font-semibold">
+                {c.username
+                  ? c.username
+                  : c.usuario_id
+                  ? c.usuario_id.slice(0, 8) + '...'
+                  : 'Anónimo'}
+              </span>
+              <span>{new Date(c.fecha).toLocaleString()}</span>
+            </div>
+            <p className="text-gray-800">{c.contenido}</p>
+            <div className="flex items-center gap-4 mt-1">
+              <span>{likes} 👍</span>
+              <span>{dislikes} 👎</span>
+              {userId && (
+                <>
+                  <ComentarioVoto
+                    comentarioId={c.id}
+                    userId={userId}
+                    valor={1}
+                    onVotado={cargarComentarios}
+                  />
+                  <ComentarioVoto
+                    comentarioId={c.id}
+                    userId={userId}
+                    valor={-1}
+                    onVotado={cargarComentarios}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        )
+      })}
+      {userId ? (
+        <div className="mt-4">
+          <textarea
+            value={contenido}
+            onChange={e => setContenido(e.target.value)}
+            placeholder="Dejá tu comentario..."
+            className="w-full border rounded p-2"
+            rows={2}
+          />
+          <button
+            onClick={manejarComentario}
+            disabled={loading || !contenido.trim()}
+            className="mt-2 bg-blue-600 text-white px-4 py-1 rounded disabled:opacity-50"
+          >
+            {loading ? 'Enviando...' : 'Comentar'}
+          </button>
+          {mensaje && <p className="text-sm text-gray-600 mt-1">{mensaje}</p>}
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500 mt-2">Iniciá sesión para comentar.</p>
       )}
     </div>
   )
