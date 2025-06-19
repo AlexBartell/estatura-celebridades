@@ -13,6 +13,8 @@ export async function getOrCreateUsername(userId: string) {
     .eq('id', userId)
     .single()
     console.log('getOrCreateUsername', userId, user)  
+    console.log('este es el userId', userId) 
+    console.log("este es username... user?.username", user?.username) 
 
   if (user && user.username) return user.username
   // Si no hay, devolvé null para redirigir
