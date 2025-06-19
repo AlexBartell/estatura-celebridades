@@ -12,7 +12,7 @@ export default function AuthCallback() {
     const fn = async () => {
       const { data } = await supabase.auth.getUser()
       const user = data.user
-
+      console.log('User data:', user)
       if (!user) {
         router.push('/iniciar-sesion') // o la ruta de login que uses
         return
