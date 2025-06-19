@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export async function getOrCreateUsername(userId: string) {
   const supabase = createClient()
-  const { data: user, error } = await supabase
+  const { data: user} = await supabase
     .from('usuarios')
     .select('username')
     .eq('id', userId)
