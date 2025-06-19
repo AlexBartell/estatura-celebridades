@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/client";
 
 // Genera un username random
-function generarUsername() {
-  return "usuario_" + Math.random().toString(36).substring(2, 8);
-}
+//function generarUsername() {
+//  return "usuario_" + Math.random().toString(36).substring(2, 8);
+//}
 
-export async function getOrCreateUsername(userId: string, email: string) {
+export async function getOrCreateUsername(userId: string) {
   const supabase = createClient()
   const { data: user, error } = await supabase
     .from('usuarios')
