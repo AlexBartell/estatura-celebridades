@@ -12,7 +12,6 @@ export default function AuthCallback() {
     const fn = async () => {
       const { data } = await supabase.auth.getUser()
       const user = data.user
-      console.log('User data:', user)
       if (!user) {
         router.push('/iniciar-sesion') // o la ruta de login que uses
         return
@@ -24,7 +23,7 @@ const username = await getOrCreateUsername(user.id)
         if (username) {
           console.log('Redirigiendo a admin', username)
         } else {
-          console.log('Redirigiendo a admin sin username')  
+          router.push('/elige-nombre')
         }
         return
       }
