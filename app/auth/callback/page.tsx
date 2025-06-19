@@ -21,6 +21,7 @@ const username = await getOrCreateUsername(user.id)
       // Si es admin, va a /admin
       if (user.email === 'alex.dunno@gmail.com') {
         router.push('/admin')
+        console.log('Redirigiendo a admin', user)
         return
       }
 
