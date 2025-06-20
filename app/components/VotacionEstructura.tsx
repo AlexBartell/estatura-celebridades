@@ -14,7 +14,7 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
   const [yaVoto, setYaVoto] = useState(false)
   const [votoId, setVotoId] = useState<string | null>(null)
 
-  // Cargar datos de la celebridad y si ya votó el usuario
+  // Cargar datos
   const cargarDatos = async () => {
     const { data: celeb } = await supabase
       .from('celebridades')
@@ -32,7 +32,7 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
       .eq('celebridad_id', celebridadId)
     setCantidadVotos(count || 0)
 
-    // Chequear si ya votó este usuario
+    // Si está logueado, buscar voto previo
     if (userId) {
       const { data: voto } = await supabase
         .from('votos')
@@ -40,7 +40,6 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
         .eq('celebridad_id', celebridadId)
         .eq('usuario_id', userId)
         .maybeSingle()
-
       if (voto) {
         setOpcion(voto.valor)
         setYaVoto(true)
@@ -50,10 +49,6 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
         setYaVoto(false)
         setVotoId(null)
       }
-    } else {
-      setOpcion(null)
-      setYaVoto(false)
-      setVotoId(null)
     }
   }
 
@@ -62,70 +57,53 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [celebridadId, userId])
 
+  // Opciones en rango de 6cm (13 botones) en pasos de 0.5
+  const opciones: number[] = typeof alturaOficial === 'number'
+    ? Array.from({ length: 13 }, (_, i) => Number((alturaOficial + (i - 6) * 0.5).toFixed(1)))
+    : []
+
   const manejarVoto = async () => {
     if (!userId) return
-    if (opcion === null || typeof opcion !== 'number') {
+    if (opcion === null) {
       setMensaje('Seleccioná una opción para votar.')
       return
     }
-
     setLoading(true)
     let error = null
 
     if (yaVoto && votoId) {
-      // Actualiza voto
-      const res = await supabase.from('votos')
-        .update({ valor: opcion })
-        .eq('id', votoId)
+      // Modificar voto existente
+      const res = await supabase.from('votos').update({ valor: opcion }).eq('id', votoId)
       error = res.error
+      setMensaje(error ? 'Error actualizando tu voto.' : '¡Voto actualizado!')
     } else {
-      // Inserta voto
+      // Votar por primera vez
       const res = await supabase.from('votos').insert({
         celebridad_id: celebridadId,
         usuario_id: userId,
         valor: opcion,
       })
       error = res.error
+      setMensaje(error ? 'Error al guardar tu voto.' : '¡Voto registrado! Gracias por participar.')
     }
 
-    if (error) {
-      setMensaje('Error al guardar tu voto.')
-      setLoading(false)
-      return
-    }
-
-    await cargarDatos()
-    setMensaje(yaVoto ? '¡Voto actualizado!' : '¡Voto registrado! Gracias por participar.')
     setLoading(false)
+    await cargarDatos()
   }
 
-  // Borrar voto
   const borrarVoto = async () => {
     if (!votoId) return
     setLoading(true)
     const { error } = await supabase.from('votos').delete().eq('id', votoId)
-    if (error) {
-      setMensaje('Error al borrar tu voto.')
-    } else {
-      setMensaje('Voto eliminado.')
-      setOpcion(null)
-      setYaVoto(false)
-      setVotoId(null)
-      await cargarDatos()
-    }
+    setMensaje(error ? 'Error al borrar tu voto.' : 'Voto eliminado.')
+    setOpcion(null)
+    setYaVoto(false)
+    setVotoId(null)
     setLoading(false)
+    await cargarDatos()
   }
 
-  // Generar las opciones de voto (13 opciones de 0,5 cm en 6cm de rango)
-  const opciones: number[] = typeof alturaOficial === 'number'
-  ? Array.from({ length: 13 }, (_, i) =>
-      Number((alturaOficial + (i - 6) * 0.5).toFixed(1))
-    )
-  : []
-  // Si no hay altura oficial, usar un rango por defecto
-
-
-  // Si no está logueado:
+  // Mostrar solo si logueado
   if (!userId) {
     return (
       <div className="mt-6 space-y-2">
@@ -149,9 +127,9 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
         </p>
       )}
       <div className="flex flex-wrap gap-2">
-        {opciones.map((op, idx) => (
+        {opciones.map((op) => (
           <button
-            key={idx}
+            key={op}
             type="button"
             onClick={() => setOpcion(op)}
             className={`px-3 py-2 rounded border transition
