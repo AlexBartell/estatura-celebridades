@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function VotacionEstatura({ celebridadId, userId }: { celebridadId: string, userId: string }) {
+export default function VotacionEstatura({ celebridadId, userId }: { celebridadId: string, userId?: string }) {
   const supabase = createClient()
   const [alturaOficial, setAlturaOficial] = useState<number | null>(null)
   const [alturaPromedio, setAlturaPromedio] = useState<number | null>(null)
+  const [cantidadVotos, setCantidadVotos] = useState<number>(0)
   const [opcion, setOpcion] = useState<number | null>(null)
   const [mensaje, setMensaje] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,18 +25,31 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
     setAlturaOficial(celeb?.altura_oficial ?? null)
     setAlturaPromedio(celeb?.altura_promedio ?? null)
 
-    // Chequear si ya votó este usuario
-    const { data: voto } = await supabase
+    // Cantidad de votos
+    const { count } = await supabase
       .from('votos')
-      .select('id, valor')
+      .select('id', { count: 'exact', head: true })
       .eq('celebridad_id', celebridadId)
-      .eq('usuario_id', userId)
-      .maybeSingle()
+    setCantidadVotos(count || 0)
 
-    if (voto) {
-      setOpcion(voto.valor)
-      setYaVoto(true)
-      setVotoId(voto.id)
+    // Chequear si ya votó este usuario
+    if (userId) {
+      const { data: voto } = await supabase
+        .from('votos')
+        .select('id, valor')
+        .eq('celebridad_id', celebridadId)
+        .eq('usuario_id', userId)
+        .maybeSingle()
+
+      if (voto) {
+        setOpcion(voto.valor)
+        setYaVoto(true)
+        setVotoId(voto.id)
+      } else {
+        setOpcion(null)
+        setYaVoto(false)
+        setVotoId(null)
+      }
     } else {
       setOpcion(null)
       setYaVoto(false)
@@ -49,6 +63,7 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
   }, [celebridadId, userId])
 
   const manejarVoto = async () => {
+    if (!userId) return
     if (opcion === null || typeof opcion !== 'number') {
       setMensaje('Seleccioná una opción para votar.')
       return
@@ -58,13 +73,13 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
     let error = null
 
     if (yaVoto && votoId) {
-      // Si ya votó, actualiza el voto
+      // Actualiza voto
       const res = await supabase.from('votos')
         .update({ valor: opcion })
         .eq('id', votoId)
       error = res.error
     } else {
-      // Si no votó, inserta
+      // Inserta voto
       const res = await supabase.from('votos').insert({
         celebridad_id: celebridadId,
         usuario_id: userId,
@@ -84,12 +99,44 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
     setLoading(false)
   }
 
+  // Borrar voto
+  const borrarVoto = async () => {
+    if (!votoId) return
+    setLoading(true)
+    const { error } = await supabase.from('votos').delete().eq('id', votoId)
+    if (error) {
+      setMensaje('Error al borrar tu voto.')
+    } else {
+      setMensaje('Voto eliminado.')
+      setOpcion(null)
+      setYaVoto(false)
+      setVotoId(null)
+      await cargarDatos()
+    }
+    setLoading(false)
+  }
+
   // Generar las opciones de voto (13 opciones de 0,5 cm en 6cm de rango)
   let opciones: number[] = []
   if (typeof alturaOficial === 'number') {
     for (let i = -3; i <= 3; i += 0.5) {
       opciones.push(Number((alturaOficial + i).toFixed(1)))
     }
+  }
+
+  // Si no está logueado:
+  if (!userId) {
+    return (
+      <div className="mt-6 space-y-2">
+        <p className="text-gray-500">Iniciá sesión para votar la estatura.</p>
+        {alturaPromedio !== null && (
+          <p className="text-gray-700 mb-2">
+            <strong>Altura promedio:</strong> {alturaPromedio} cm
+          </p>
+        )}
+        <p className="text-xs text-gray-500">Cantidad de votos: {cantidadVotos}</p>
+      </div>
+    )
   }
 
   return (
@@ -115,13 +162,25 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
           </button>
         ))}
       </div>
-      <button
-        onClick={manejarVoto}
-        disabled={loading || opcion === null}
-        className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 mt-2"
-      >
-        {yaVoto ? (loading ? 'Actualizando...' : 'Actualizar voto') : (loading ? 'Enviando...' : 'Votar')}
-      </button>
+      <div className="flex gap-2 mt-2">
+        <button
+          onClick={manejarVoto}
+          disabled={loading || opcion === null}
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          {yaVoto ? (loading ? 'Actualizando...' : 'Actualizar voto') : (loading ? 'Enviando...' : 'Votar')}
+        </button>
+        {yaVoto && (
+          <button
+            onClick={borrarVoto}
+            disabled={loading}
+            className="bg-red-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            {loading ? 'Borrando...' : 'Borrar voto'}
+          </button>
+        )}
+      </div>
+      <p className="text-xs text-gray-500">Cantidad de votos: {cantidadVotos}</p>
       {mensaje && <p className="text-sm text-gray-700">{mensaje}</p>}
     </div>
   )
