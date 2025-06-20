@@ -117,12 +117,13 @@ export default function VotacionEstatura({ celebridadId, userId }: { celebridadI
   }
 
   // Generar las opciones de voto (13 opciones de 0,5 cm en 6cm de rango)
-  let opciones: number[] = []
-  if (typeof alturaOficial === 'number') {
-    for (let i = -3; i <= 3; i += 0.5) {
-      opciones.push(Number((alturaOficial + i).toFixed(1)))
-    }
-  }
+  const opciones: number[] = typeof alturaOficial === 'number'
+  ? Array.from({ length: 13 }, (_, i) =>
+      Number((alturaOficial + (i - 6) * 0.5).toFixed(1))
+    )
+  : []
+  // Si no hay altura oficial, usar un rango por defecto
+
 
   // Si no está logueado:
   if (!userId) {
