@@ -10,6 +10,7 @@ interface Comentario {
   fecha: string
   usuario_id: string | null
   username: string | null
+  moderado?: boolean | null    // ← Añadido para TypeScript
   comentario_votos?: { valor: number; usuario_id: string }[]
 }
 
@@ -26,7 +27,7 @@ export default function ComentariosCelebridad({
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
 
-  // Traer comentarios con votos al cargar el componente
+  // Traer solo comentarios moderados
   const cargarComentarios = async () => {
     const { data, error } = await supabase
       .from('comentarios')
@@ -36,9 +37,11 @@ export default function ComentariosCelebridad({
         fecha,
         usuario_id,
         username,
+        moderado,
         comentario_votos (valor, usuario_id)
       `)
       .eq('celebridad_id', celebridadId)
+      .eq('moderado', true) // ← SOLO los moderados
       .order('fecha', { ascending: false })
 
     if (error) {
@@ -80,12 +83,13 @@ export default function ComentariosCelebridad({
       username,
       contenido,
       fecha: new Date().toISOString(),
+      moderado: false // Cuando se crea NO está moderado
     })
     if (error) {
       setMensaje('Error al guardar el comentario.')
     } else {
       setContenido('')
-      setMensaje('¡Comentario publicado!')
+      setMensaje('¡Comentario publicado! Será visible tras ser moderado.')
       await cargarComentarios()
     }
     setLoading(false)

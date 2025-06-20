@@ -9,7 +9,7 @@ import FormActualizarAltura from '@/app/components/FormActualizarAltura'
 import BuscadorCelebridades, { Celebridad } from '@/app/components/BuscadorCelebridades'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-
+import ListaComentariosModeracion from '@/app/components/ListaComentariosModeracion'
 export default function AdminPage() {
   const [celebridades, setCelebridades] = useState<Celebridad[]>([])
   const [userEmail, setUserEmail] = useState('')
@@ -54,7 +54,7 @@ export default function AdminPage() {
     <main className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Panel de administrador</h1>
       <p className="mb-4">Sesión activa: {userEmail}</p>
-
+<ListaComentariosModeracion />
       <FormAgregarCelebridad />
 
       <hr className="my-6" />
