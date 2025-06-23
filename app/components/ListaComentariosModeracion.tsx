@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-type ComentarioMod = {
+interface ComentarioMod {
   id: string
   contenido: string
   username: string | null
@@ -13,15 +13,14 @@ type ComentarioMod = {
 }
 
 export default function ListaComentariosModeracion() {
-  const supabase = createClient()
   const [comentarios, setComentarios] = useState<ComentarioMod[]>([])
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
 
-  // Traer comentarios no moderados con el nombre de la celebridad
+  const supabase = createClient()
+
   const cargarComentarios = async () => {
     setLoading(true)
-    setMsg('')
     const { data, error } = await supabase
       .from('comentarios')
       .select(`
@@ -30,86 +29,89 @@ export default function ListaComentariosModeracion() {
         username,
         fecha,
         moderado,
-        celebridad:celebridad_id (
-          nombre
-        )
+        celebridad:celebridades(nombre)
       `)
       .eq('moderado', false)
       .order('fecha', { ascending: false })
       .limit(50)
+
     if (error) setMsg('Error cargando comentarios')
-    setComentarios(data ?? [])
+    // Solucionar el array: sacar el primer celebridad
+    setComentarios(
+      (data ?? []).map((c: any) => ({
+        ...c,
+        celebridad: Array.isArray(c.celebridad) && c.celebridad[0]
+          ? c.celebridad[0]
+          : null,
+      }))
+    )
     setLoading(false)
   }
 
   useEffect(() => {
     cargarComentarios()
+    // eslint-disable-next-line
   }, [])
 
-  // Aprobar
   const aprobarComentario = async (id: string) => {
     setLoading(true)
     const { error } = await supabase
       .from('comentarios')
       .update({ moderado: true })
       .eq('id', id)
-    if (!error) {
-      setMsg('Comentario aprobado.')
-      await cargarComentarios()
-    }
+    if (error) setMsg('Error al aprobar')
+    await cargarComentarios()
     setLoading(false)
   }
 
-  // Rechazar (borrar)
-  const borrarComentario = async (id: string) => {
+  const rechazarComentario = async (id: string) => {
     setLoading(true)
     const { error } = await supabase
       .from('comentarios')
       .delete()
       .eq('id', id)
-    if (!error) {
-      setMsg('Comentario eliminado.')
-      await cargarComentarios()
-    }
+    if (error) setMsg('Error al rechazar')
+    await cargarComentarios()
     setLoading(false)
   }
 
   return (
-    <section className="mt-10">
-      <h2 className="text-lg font-bold mb-4">Moderación de comentarios</h2>
-      {msg && <p className="text-green-700 mb-2">{msg}</p>}
-      {loading && <p className="text-gray-500">Cargando...</p>}
+    <section className="mt-8">
+      <h2 className="text-lg font-bold mb-4">Comentarios pendientes de moderar</h2>
+      {msg && <p className="text-red-600 mb-2">{msg}</p>}
+      {loading && <p>Cargando...</p>}
       {!loading && comentarios.length === 0 && (
         <p className="text-gray-500">No hay comentarios pendientes.</p>
       )}
       <ul className="space-y-4">
         {comentarios.map((c) => (
-          <li key={c.id} className="border p-3 rounded shadow bg-white">
-            <div className="mb-1">
-              <span className="font-semibold text-blue-700">
-                Celebridad: {c.celebridad?.nombre || <span className="text-red-600">Sin celebridad</span>}
-              </span>
-            </div>
-            <div className="mb-1">
-              <span className="font-semibold">{c.username ?? 'Anónimo'}</span>{' '}
-              <span className="text-xs text-gray-600">{new Date(c.fecha).toLocaleString()}</span>
-            </div>
-            <p className="mb-2">{c.contenido}</p>
-            <div className="flex gap-3">
-              <button
-                className="bg-green-600 text-white px-3 py-1 rounded"
-                onClick={() => aprobarComentario(c.id)}
-                disabled={loading}
-              >
-                Aprobar
-              </button>
-              <button
-                className="bg-red-600 text-white px-3 py-1 rounded"
-                onClick={() => borrarComentario(c.id)}
-                disabled={loading}
-              >
-                Rechazar
-              </button>
+          <li key={c.id} className="border-b pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-semibold">{c.username || 'Anónimo'}</span>
+                <span className="ml-3 text-sm text-gray-600">{new Date(c.fecha).toLocaleString()}</span>
+                <div className="text-sm text-gray-700 mt-1">{c.contenido}</div>
+                <div className="text-xs mt-1 italic text-gray-500">
+                  Celebridad:{' '}
+                  {c.celebridad?.nombre || 'Sin celebridad'}
+                </div>
+              </div>
+              <div className="flex gap-2 ml-4">
+                <button
+                  onClick={() => aprobarComentario(c.id)}
+                  className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+                  disabled={loading}
+                >
+                  Aprobar
+                </button>
+                <button
+                  onClick={() => rechazarComentario(c.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                  disabled={loading}
+                >
+                  Rechazar
+                </button>
+              </div>
             </div>
           </li>
         ))}
