@@ -3,21 +3,31 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-interface ComentarioMod {
+// Tipo para comentario pendiente de moderación
+type ComentarioMod = {
   id: string
   contenido: string
   username: string | null
   fecha: string
   moderado: boolean | null
-  celebridad: { nombre: string } | null
+  celebridad: { nombre: string } | null // Relación normalizada
+}
+
+// Tipo crudo que retorna Supabase (celebridad es array o null)
+type ComentarioDB = {
+  id: string
+  contenido: string
+  username: string | null
+  fecha: string
+  moderado: boolean | null
+  celebridad: { nombre: string }[] | null
 }
 
 export default function ListaComentariosModeracion() {
+  const supabase = createClient()
   const [comentarios, setComentarios] = useState<ComentarioMod[]>([])
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
-
-  const supabase = createClient()
 
   const cargarComentarios = async () => {
     setLoading(true)
@@ -38,10 +48,10 @@ export default function ListaComentariosModeracion() {
 
     if (error) setMsg('Error cargando comentarios')
 
-    // Corrige: si celebridad viene como array, agarrá el primer objeto
-    const normalizados = (data ?? []).map((c: any) => ({
+    // Normalizá la relación (celebridad como objeto, no array)
+    const normalizados: ComentarioMod[] = (data ?? []).map((c: ComentarioDB) => ({
       ...c,
-      celebridad: Array.isArray(c.celebridad) ? c.celebridad[0] : c.celebridad ?? null,
+      celebridad: c.celebridad && Array.isArray(c.celebridad) ? c.celebridad[0] : null,
     }))
 
     setComentarios(normalizados)
@@ -50,77 +60,61 @@ export default function ListaComentariosModeracion() {
 
   useEffect(() => {
     cargarComentarios()
-    // eslint-disable-next-line
   }, [])
 
+  // Aprobar comentario
   const aprobar = async (id: string) => {
-    setLoading(true)
-    const { error } = await supabase
-      .from('comentarios')
-      .update({ moderado: true })
-      .eq('id', id)
-    if (error) setMsg('Error aprobando comentario')
-    else setMsg('¡Comentario aprobado!')
+    await supabase.from('comentarios').update({ moderado: true }).eq('id', id)
     await cargarComentarios()
-    setLoading(false)
   }
 
+  // Rechazar (borrar) comentario
   const rechazar = async (id: string) => {
-    setLoading(true)
-    const { error } = await supabase
-      .from('comentarios')
-      .delete()
-      .eq('id', id)
-    if (error) setMsg('Error eliminando comentario')
-    else setMsg('Comentario eliminado.')
+    await supabase.from('comentarios').delete().eq('id', id)
     await cargarComentarios()
-    setLoading(false)
   }
 
   return (
-    <section className="mt-8">
-      <h2 className="text-xl font-bold mb-2">Comentarios pendientes de moderación</h2>
-      {msg && <p className="text-sm text-gray-700 mb-2">{msg}</p>}
-      {loading && <p className="text-gray-500">Cargando...</p>}
-      {!comentarios.length && !loading && (
-        <p className="text-gray-500">No hay comentarios pendientes.</p>
-      )}
-      <div className="space-y-4">
-        {comentarios.map(c => (
-          <div key={c.id} className="border p-3 rounded bg-yellow-50">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <span className="font-semibold">{c.username || 'Anónimo'}</span>
-                <span className="ml-2 text-xs text-gray-500">
-                  {new Date(c.fecha).toLocaleString()}
-                </span>
-                {c.celebridad?.nombre && (
-                  <span className="ml-3 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
-                    {c.celebridad.nombre}
+    <section className="mt-10">
+      <h2 className="text-xl font-semibold mb-4">Comentarios pendientes de moderación</h2>
+      {msg && <p className="text-red-600 mb-2">{msg}</p>}
+      {loading ? (
+        <p>Cargando...</p>
+      ) : (
+        <div className="space-y-4">
+          {comentarios.length === 0 && (
+            <p className="text-gray-500">No hay comentarios pendientes.</p>
+          )}
+          {comentarios.map((c) => (
+            <div key={c.id} className="border p-3 rounded flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-yellow-50">
+              <div className="flex-1">
+                <div className="text-xs text-gray-600 mb-1">
+                  <span className="font-bold">{c.username || 'Anónimo'}</span>{' · '}
+                  <span>{new Date(c.fecha).toLocaleString()}</span>{' · '}
+                  <span className="italic text-blue-800">
+                    {c.celebridad?.nombre || 'Sin celebridad'}
                   </span>
-                )}
+                </div>
+                <div className="text-gray-900">{c.contenido}</div>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => aprobar(c.id)}
-                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
-                  disabled={loading}
+                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                 >
                   Aprobar
                 </button>
                 <button
                   onClick={() => rechazar(c.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                  disabled={loading}
+                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
                 >
                   Rechazar
                 </button>
               </div>
             </div>
-            <p className="mt-2">{c.contenido}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
