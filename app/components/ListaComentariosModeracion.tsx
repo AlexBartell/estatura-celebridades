@@ -24,7 +24,14 @@ export default function ListaComentariosModeracion() {
     setMsg('')
     const { data, error } = await supabase
       .from('comentarios')
-      .select('id, contenido, username, fecha, moderado, celebridad:celebridad_id(nombre)')
+      .select(`
+        id,
+        contenido,
+        username,
+        fecha,
+        moderado,
+        celebridad:celebridad_id (nombre)
+      `)
       .or('moderado.is.null,moderado.eq.false')
       .order('fecha', { ascending: true })
       .limit(50)
