@@ -35,8 +35,16 @@ export default function ListaComentariosModeracion() {
       .or('moderado.is.null,moderado.eq.false')
       .order('fecha', { ascending: true })
       .limit(50)
+
     if (error) setMsg('Error cargando comentarios')
-    setComentarios(data ?? [])
+
+    // Corrige: si celebridad viene como array, agarrá el primer objeto
+    const normalizados = (data ?? []).map((c: any) => ({
+      ...c,
+      celebridad: Array.isArray(c.celebridad) ? c.celebridad[0] : c.celebridad ?? null,
+    }))
+
+    setComentarios(normalizados)
     setLoading(false)
   }
 
