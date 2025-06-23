@@ -3,6 +3,18 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+interface CelebridadRelacion {
+  nombre: string
+}
+interface ComentarioSupabase {
+  id: string
+  contenido: string
+  username: string | null
+  fecha: string
+  moderado: boolean | null
+  celebridad: CelebridadRelacion[] // <- Viene como array
+}
+
 interface ComentarioMod {
   id: string
   contenido: string
@@ -36,13 +48,13 @@ export default function ListaComentariosModeracion() {
       .limit(50)
 
     if (error) setMsg('Error cargando comentarios')
-    // Solucionar el array: sacar el primer celebridad
     setComentarios(
-      (data ?? []).map((c: any) => ({
+      (data as ComentarioSupabase[] ?? []).map((c): ComentarioMod => ({
         ...c,
-        celebridad: Array.isArray(c.celebridad) && c.celebridad[0]
-          ? c.celebridad[0]
-          : null,
+        celebridad:
+          Array.isArray(c.celebridad) && c.celebridad.length > 0
+            ? c.celebridad[0]
+            : null,
       }))
     )
     setLoading(false)
