@@ -3,25 +3,13 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-interface CelebridadRelacion {
-  nombre: string
-}
-interface ComentarioSupabase {
-  id: string
-  contenido: string
-  username: string | null
-  fecha: string
-  moderado: boolean | null
-  celebridad: CelebridadRelacion[] // <- Viene como array
-}
-
 interface ComentarioMod {
   id: string
   contenido: string
   username: string | null
   fecha: string
   moderado: boolean | null
-  celebridad: { nombre: string } | null
+  celebridades?: { nombre: string } | null // ← relación
 }
 
 export default function ListaComentariosModeracion() {
@@ -33,8 +21,8 @@ export default function ListaComentariosModeracion() {
 
   const cargarComentarios = async () => {
     setLoading(true)
+    // Consultar celebridades(nombre) para la relación
     const { data, error } = await supabase
-    console.log('DATA RECIBIDA DE SUPABASE:', data)
       .from('comentarios')
       .select(`
         id,
@@ -42,22 +30,16 @@ export default function ListaComentariosModeracion() {
         username,
         fecha,
         moderado,
-        celebridad:celebridades(nombre)
+        celebridades ( nombre )
       `)
-      .eq('moderado', false)
+      .or('moderado.is.false,moderado.is.null') // busca no moderados
       .order('fecha', { ascending: false })
       .limit(50)
 
+    console.log('DATA RECIBIDA DE SUPABASE:', data)
+
     if (error) setMsg('Error cargando comentarios')
-    setComentarios(
-      (data as ComentarioSupabase[] ?? []).map((c): ComentarioMod => ({
-        ...c,
-        celebridad:
-          Array.isArray(c.celebridad) && c.celebridad.length > 0
-            ? c.celebridad[0]
-            : null,
-      }))
-    )
+    setComentarios(data ?? [])
     setLoading(false)
   }
 
@@ -106,7 +88,7 @@ export default function ListaComentariosModeracion() {
                 <div className="text-sm text-gray-700 mt-1">{c.contenido}</div>
                 <div className="text-xs mt-1 italic text-gray-500">
                   Celebridad:{' '}
-                  {c.celebridad?.nombre || 'Sin celebridad'}
+                  {c.celebridades?.nombre || 'Sin celebridad'}
                 </div>
               </div>
               <div className="flex gap-2 ml-4">
