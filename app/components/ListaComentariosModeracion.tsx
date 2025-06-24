@@ -34,6 +34,7 @@ export default function ListaComentariosModeracion() {
   const cargarComentarios = async () => {
     setLoading(true)
     const { data, error } = await supabase
+    console.log('DATA RECIBIDA DE SUPABASE:', data)
       .from('comentarios')
       .select(`
         id,
