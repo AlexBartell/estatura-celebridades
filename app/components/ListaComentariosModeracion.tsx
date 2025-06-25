@@ -12,7 +12,7 @@ interface ComentarioMod {
   username: string | null
   fecha: string
   moderado: boolean | null
-  celebridad: CelebridadRelacion | null
+  celebridad: CelebridadRelacion | CelebridadRelacion[] | null
 }
 
 export default function ListaComentariosModeracion() {
@@ -38,9 +38,16 @@ export default function ListaComentariosModeracion() {
       .order('fecha', { ascending: false })
       .limit(50)
 
-    // data es ComentarioMod[] o null
     if (error) setMsg('Error cargando comentarios')
-    setComentarios((data as ComentarioMod[]) ?? [])
+    // NORMALIZAR: siempre usar objeto celebridad (nunca array)
+    const normalizados = (data ?? []).map((c: any) => ({
+      ...c,
+      celebridad:
+        c.celebridad && Array.isArray(c.celebridad)
+          ? c.celebridad[0] || null
+          : c.celebridad || null,
+    }))
+    setComentarios(normalizados)
     setLoading(false)
   }
 
@@ -89,7 +96,14 @@ export default function ListaComentariosModeracion() {
                 <div className="text-sm text-gray-700 mt-1">{c.contenido}</div>
                 <div className="text-xs mt-1 italic text-gray-500">
                   Celebridad:{' '}
-                  {c.celebridad?.nombre || 'Sin celebridad'}
+                  {
+                    // soporte objeto o array
+                    c.celebridad
+                      ? Array.isArray(c.celebridad)
+                        ? c.celebridad[0]?.nombre || 'Sin celebridad'
+                        : c.celebridad.nombre || 'Sin celebridad'
+                      : 'Sin celebridad'
+                  }
                 </div>
               </div>
               <div className="flex gap-2 ml-4">
@@ -115,6 +129,4 @@ export default function ListaComentariosModeracion() {
     </section>
   )
 }
-// Nota: Este componente asume que tienes una tabla 'comentarios' con las columnas
-// id, contenido, username, fecha, moderado y una relación con 'celebridades'.
-// Asegúrate de que la estructura de tu base de datos coincide con esto.
+// Nota: Este componente asume que Supabase ya está configurado y que la tabla 'comentarios' tiene las columnas adecuadas.
