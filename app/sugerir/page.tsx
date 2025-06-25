@@ -1,86 +1,81 @@
 'use client'
-import { useState, useEffect } from 'react'
+
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-export default function SugerirCelebridad() {
+export default function SugerirCelebridadPage() {
+  const supabase = createClient()
+  const router = useRouter()
   const [nombre, setNombre] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [enviando, setEnviando] = useState(false)
-  const [logeado, setLogeado] = useState(false)
-  const router = useRouter()
-  const supabase = createClient()
 
-  useEffect(() => {
-    // Chequear si el usuario está logueado
-    const fn = async () => {
-      const { data } = await supabase.auth.getUser()
-      setLogeado(!!data.user)
-    }
-    fn()
-  }, [supabase])
-
-  function slugify(text: string) {
-    return text
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '')
-  }
-
-  const enviarSugerencia = async (e: React.FormEvent) => {
+  // Obtener usuario logueado
+  const sugerirCelebridad = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!nombre.trim()) {
-      setMensaje('Por favor escribí el nombre.')
+    setEnviando(true)
+    setMensaje('')
+
+    // 1. Chequear sesión de usuario
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      setMensaje('Debés iniciar sesión para sugerir una celebridad.')
+      setEnviando(false)
       return
     }
-    setEnviando(true)
-    const slug = slugify(nombre.trim())
+    const userId = userData.user.id
 
+    // 2. Obtener el nombre de usuario (opcional, pero lo pediste)
+    let usuarioNombre = null
+    if (userId) {
+      const { data: usuario } = await supabase
+        .from('usuarios')
+        .select('username')
+        .eq('id', userId)
+        .single()
+      usuarioNombre = usuario?.username || null
+    }
+
+    // 3. Insertar sugerencia con campos extra
     const { error } = await supabase.from('solicitudes_pendientes').insert({
-      slug,
+      slug: nombre.trim(),
       fecha: new Date().toISOString(),
+      id_usuario: userId,
+      usuario_nombre: usuarioNombre,
     })
-    setEnviando(false)
+
     if (error) {
       setMensaje('Error al enviar sugerencia.')
     } else {
-      setMensaje('¡Gracias! Tu sugerencia fue enviada.')
+      setMensaje('¡Sugerencia enviada! Gracias por tu aporte.')
       setNombre('')
-      setTimeout(() => router.push('/'), 1500)
+      // router.push('/')  // Si querés redirigir después
     }
-  }
-
-  if (!logeado) {
-    return (
-      <main className="max-w-lg mx-auto p-6">
-        <h1 className="text-xl font-bold mb-4">Sugerir nueva celebridad</h1>
-        <p className="text-gray-600">Debés iniciar sesión para sugerir celebridades.</p>
-      </main>
-    )
+    setEnviando(false)
   }
 
   return (
-    <main className="max-w-lg mx-auto p-6">
-      <h1 className="text-xl font-bold mb-4">Sugerir nueva celebridad</h1>
-      <form onSubmit={enviarSugerencia} className="space-y-4">
+    <main className="max-w-lg mx-auto mt-10">
+      <h1 className="text-2xl font-bold mb-4">Sugerir nueva celebridad</h1>
+      <form onSubmit={sugerirCelebridad} className="space-y-4">
         <input
           type="text"
           value={nombre}
           onChange={e => setNombre(e.target.value)}
-          placeholder="Nombre de la celebridad"
-          className="w-full border rounded p-2"
+          className="border p-2 w-full rounded"
+          placeholder="Nombre o slug de la celebridad"
           disabled={enviando}
         />
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          disabled={enviando}
+          disabled={enviando || !nombre.trim()}
         >
           {enviando ? 'Enviando...' : 'Sugerir'}
         </button>
       </form>
-      {mensaje && <p className="mt-2 text-gray-700">{mensaje}</p>}
+      {mensaje && <p className="mt-4 text-sm text-gray-700">{mensaje}</p>}
     </main>
   )
 }
