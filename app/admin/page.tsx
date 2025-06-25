@@ -1,7 +1,7 @@
 // app/admin/page.tsx
 
 'use client'
-
+import ListaSugerencias from '@/app/components/ListaSugerencias'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import FormAgregarCelebridad from '@/app/components/FormAgregarCelebridad'
@@ -54,6 +54,7 @@ export default function AdminPage() {
     <main className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Panel de administrador</h1>
       <p className="mb-4">Sesión activa: {userEmail}</p>
+      <ListaSugerencias />
 <ListaComentariosModeracion />
       <FormAgregarCelebridad />
 
