@@ -1,7 +1,5 @@
-// app/sugerir/page.tsx
-
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -9,8 +7,18 @@ export default function SugerirCelebridad() {
   const [nombre, setNombre] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [logeado, setLogeado] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    // Chequear si el usuario está logueado
+    const fn = async () => {
+      const { data } = await supabase.auth.getUser()
+      setLogeado(!!data.user)
+    }
+    fn()
+  }, [supabase])
 
   function slugify(text: string) {
     return text
@@ -41,6 +49,15 @@ export default function SugerirCelebridad() {
       setNombre('')
       setTimeout(() => router.push('/'), 1500)
     }
+  }
+
+  if (!logeado) {
+    return (
+      <main className="max-w-lg mx-auto p-6">
+        <h1 className="text-xl font-bold mb-4">Sugerir nueva celebridad</h1>
+        <p className="text-gray-600">Debés iniciar sesión para sugerir celebridades.</p>
+      </main>
+    )
   }
 
   return (
