@@ -11,7 +11,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   const { data: celeb, error } = await supabase
     .from('celebridades')
-    .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial')
+    .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial, descripcion')
     .eq('slug', params.slug)
     .single()
 
@@ -29,6 +29,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           className="w-full max-h-[500px] object-cover rounded"
         />
       )}
+      <p className="text-gray-600">{celeb.descripcion || 'No hay descripción disponible.'}</p>
 
       <p className="text-gray-700">
         <strong>Altura promedio por usuarios:</strong>{' '}
