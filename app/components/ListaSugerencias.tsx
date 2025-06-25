@@ -7,6 +7,7 @@ interface Sugerencia {
   id: string
   slug: string
   fecha: string
+  usuario_nombre?: string | null
   leida: boolean | null
 }
 
@@ -22,7 +23,7 @@ export default function ListaSugerencias() {
     setMsg('')
     const { data, error } = await supabase
       .from('solicitudes_pendientes')
-      .select('id, slug, fecha, leida')
+      .select('id, slug, fecha, leida, usuario_nombre')
       .or('leida.is.null,leida.eq.false') // Solo no leídas o null
       .order('fecha', { ascending: false })
       .limit(50)
@@ -79,6 +80,9 @@ export default function ListaSugerencias() {
               <div>
                 <div className="font-semibold">{sug.slug}</div>
                 <div className="text-xs text-gray-500">{new Date(sug.fecha).toLocaleString()}</div>
+                <div className="text-xs text-gray-500">
+                  {sug.usuario_nombre ? `Sugerido por: ${sug.usuario_nombre}` : 'Usuario anónimo'}
+                </div>  
               </div>
               <div className="flex gap-2">
                 <button
