@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { count } from 'console'
 
 export default function FormAgregarCelebridad() { // <--- eliminado { userId }
   const [nombre, setNombre] = useState('')
@@ -117,6 +116,11 @@ export default function FormAgregarCelebridad() { // <--- eliminado { userId }
           className="w-full p-2 border rounded"
           rows={3}
           placeholder="Una breve descripción de la celebridad..."
+        />
+        <input
+          type="text"
+          value={descripcion.length} // Fecha de creación automática
+          readOnly
         />
       </div>  
       <button
