@@ -2,11 +2,10 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+
 
 export default function SugerirCelebridadPage() {
   const supabase = createClient()
-  const router = useRouter()
   const [nombre, setNombre] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [enviando, setEnviando] = useState(false)
