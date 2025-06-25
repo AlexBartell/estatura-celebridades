@@ -29,7 +29,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
           className="w-full max-h-[500px] object-cover rounded"
         />
       )}
-      <p className="text-gray-600">{celeb.descripcion || 'No hay descripción disponible.'}</p>
+      <p className="text-gray-600">
+        <strong>Descripción:</strong>
+      </p>
+      <p className="text-gray-700 mb-4">    
+        {celeb.descripcion || 'No hay descripción disponible.'}</p>
 
       <p className="text-gray-700">
         <strong>Altura promedio por usuarios:</strong>{' '}
