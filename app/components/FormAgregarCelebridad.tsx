@@ -2,11 +2,15 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { count } from 'console'
 
 export default function FormAgregarCelebridad() { // <--- eliminado { userId }
   const [nombre, setNombre] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [altura, setAltura] = useState('')
+  const [descripcion, setDescripcion] = useState('')
+  // Si quieres guardar el usuario que crea, puedes agregar userId aquí
+  // const [userId, setUserId] = useState<string | null>(null)
   const [mensaje, setMensaje] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -54,6 +58,7 @@ export default function FormAgregarCelebridad() { // <--- eliminado { userId }
       foto_url: fotoUrl || null,
       altura_oficial: alturaNum,
       votos_total: 0,
+      descripcion: descripcion || null,
       fecha_creacion: new Date().toISOString(),
       // Si quieres guardar el usuario que crea, agrega aquí: user_id: userId,
     })
@@ -65,6 +70,7 @@ export default function FormAgregarCelebridad() { // <--- eliminado { userId }
       setNombre('')
       setFotoUrl('')
       setAltura('')
+      setDescripcion('')
     }
     setLoading(false)
   }
@@ -103,6 +109,16 @@ export default function FormAgregarCelebridad() { // <--- eliminado { userId }
           required
         />
       </div>
+      <div>
+        <label className="block text-sm font-medium">Descripción (opcional)</label>
+        <textarea
+          value={descripcion}
+          onChange={e => setDescripcion(e.target.value)}
+          className="w-full p-2 border rounded"
+          rows={3}
+          placeholder="Una breve descripción de la celebridad..."
+        />
+      </div>  
       <button
         type="submit"
         className="bg-blue-600 text-white px-4 py-2 rounded"
