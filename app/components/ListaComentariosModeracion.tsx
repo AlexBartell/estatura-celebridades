@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 interface CelebridadRelacion {
   nombre: string
 }
-interface ComentarioMod {
+interface ComentarioRaw {
   id: string
   contenido: string
   username: string | null
@@ -16,7 +16,7 @@ interface ComentarioMod {
 }
 
 export default function ListaComentariosModeracion() {
-  const [comentarios, setComentarios] = useState<ComentarioMod[]>([])
+  const [comentarios, setComentarios] = useState<ComentarioRaw[]>([])
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
 
@@ -39,8 +39,8 @@ export default function ListaComentariosModeracion() {
       .limit(50)
 
     if (error) setMsg('Error cargando comentarios')
-    // NORMALIZAR: siempre usar objeto celebridad (nunca array)
-    const normalizados = (data ?? []).map((c: any) => ({
+    // Normalizá celebridad: si viene como array, usá el primero, si viene como objeto, usalo directo.
+    const normalizados: ComentarioRaw[] = (data ?? []).map((c: ComentarioRaw) => ({
       ...c,
       celebridad:
         c.celebridad && Array.isArray(c.celebridad)
@@ -97,7 +97,6 @@ export default function ListaComentariosModeracion() {
                 <div className="text-xs mt-1 italic text-gray-500">
                   Celebridad:{' '}
                   {
-                    // soporte objeto o array
                     c.celebridad
                       ? Array.isArray(c.celebridad)
                         ? c.celebridad[0]?.nombre || 'Sin celebridad'
@@ -129,4 +128,4 @@ export default function ListaComentariosModeracion() {
     </section>
   )
 }
-// Nota: Este componente asume que Supabase ya está configurado y que la tabla 'comentarios' tiene las columnas adecuadas.
+// Nota: Este componente asume que ya tienes configurado Supabase y la tabla 'comentarios' con las columnas adecuadas.
