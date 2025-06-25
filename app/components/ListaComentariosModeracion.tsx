@@ -3,13 +3,16 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+interface CelebridadRelacion {
+  nombre: string
+}
 interface ComentarioMod {
   id: string
   contenido: string
   username: string | null
   fecha: string
   moderado: boolean | null
-  celebridad: { nombre: string } | null
+  celebridad: CelebridadRelacion | null
 }
 
 export default function ListaComentariosModeracion() {
@@ -35,15 +38,9 @@ export default function ListaComentariosModeracion() {
       .order('fecha', { ascending: false })
       .limit(50)
 
-    console.log('Comentarios cargados:', data)
+    // data es ComentarioMod[] o null
     if (error) setMsg('Error cargando comentarios')
-    // data.celebridad es ahora un objeto o null
-    setComentarios(
-      (data ?? []).map((c: any): ComentarioMod => ({
-        ...c,
-        celebridad: c.celebridad ?? null,
-      }))
-    )
+    setComentarios((data as ComentarioMod[]) ?? [])
     setLoading(false)
   }
 
@@ -118,3 +115,6 @@ export default function ListaComentariosModeracion() {
     </section>
   )
 }
+// Nota: Este componente asume que tienes una tabla 'comentarios' con las columnas
+// id, contenido, username, fecha, moderado y una relación con 'celebridades'.
+// Asegúrate de que la estructura de tu base de datos coincide con esto.
