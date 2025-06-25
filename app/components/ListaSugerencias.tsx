@@ -26,7 +26,11 @@ export default function ListaSugerencias() {
       .or('leida.is.null,leida.eq.false') // Solo no leídas o null
       .order('fecha', { ascending: false })
       .limit(50)
-
+    console.log('Cargando sugerencias:', data, error)
+    if (error && error.code === 'PGRST116') {
+      setMsg('No hay sugerencias pendientes')
+      setSugerencias([])
+    } else
     if (error) {
       setMsg('Error cargando sugerencias')
       setSugerencias([])
