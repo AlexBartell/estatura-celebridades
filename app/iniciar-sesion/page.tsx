@@ -3,9 +3,12 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
+// Si querés usar iconos, asegurate de tener instalado react-icons: npm i react-icons
+import { FcGoogle } from 'react-icons/fc'
+
 export default function LoginPage() {
   const router = useRouter()
-  const supabase  = createClient() // ✅ Ahora está disponible en toda la función
+  const supabase  = createClient()
 
   useEffect(() => {
     const checkUser = async () => {
@@ -18,7 +21,6 @@ export default function LoginPage() {
         router.push('/')
       }
     }
-
     checkUser()
   }, [router, supabase])
 
@@ -26,18 +28,27 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://estatura-celebridades.vercel.app/auth/callback', // Cambiar para producción
+        redirectTo: 'https://estatura-celebridades.vercel.app/auth/callback',
       },
     })
     if (error) alert('Error al iniciar sesión')
   }
 
   return (
-    <main className="p-6">
-      <h1 className="text-xl mb-4">Iniciar sesión</h1>
-      <button onClick={login} className="bg-blue-600 text-white px-4 py-2 rounded">
-        Iniciar con Google
-      </button>
+    <main className="min-h-[50vh] flex flex-col justify-center items-center">
+      <div className="max-w-xs w-full p-6 bg-white rounded-xl shadow-md border">
+        <h1 className="text-xl font-semibold mb-6 text-center">Iniciar sesión</h1>
+        <button
+          onClick={login}
+          className="flex items-center justify-center gap-3 w-full bg-white border border-gray-300 hover:bg-gray-100 px-4 py-3 rounded-lg font-medium text-gray-700 shadow transition"
+        >
+          <FcGoogle size={22} />
+          Iniciar sesión con Google
+        </button>
+        <p className="mt-6 text-xs text-gray-400 text-center">
+          Solo usaremos tu email para autenticarte. Nunca compartiremos tu información.
+        </p>
+      </div>
     </main>
   )
 }
