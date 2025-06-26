@@ -6,17 +6,22 @@ import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
 
 // Simple función para obtener bandera emoji por país
 function getFlagEmoji(country: string) {
+  if (!country) return ''
+  // Si es menos de 2 caracteres, no arma bandera
+  if (country.length < 2) return ''
   const codePoints = country
     .toUpperCase()
     .replace(/ /g, '')
+    .slice(0, 2) // Solo toma dos letras (ISO2)
     .split('')
-    .map(char => 127397 + char.charCodeAt())
+    .map(char => 127397 + char.charCodeAt(0))
   try {
     return String.fromCodePoint(...codePoints)
   } catch {
     return ''
   }
 }
+
 
 export const dynamic = 'force-dynamic'
 
