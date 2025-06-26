@@ -1,4 +1,3 @@
-// app/components/HomeExtras.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -12,17 +11,6 @@ interface Comentario {
   celebridad_slug: string
   celebridad_nombre: string
   fecha: string
-}
-
-interface ComentarioDB {
-  id: string
-  contenido: string
-  username: string | null
-  fecha: string
-  celebridad: {
-    slug: string
-    nombre: string
-  } | null
 }
 
 interface CelebridadDestacada {
@@ -68,14 +56,30 @@ export default function HomeExtras() {
 
       if (!error && data) {
         setComentarios(
-          (data as ComentarioDB[]).map((c) => ({
-            id: c.id,
-            contenido: c.contenido,
-            username: c.username,
-            fecha: c.fecha,
-            celebridad_slug: c.celebridad?.slug ?? '',
-            celebridad_nombre: c.celebridad?.nombre ?? '',
-          }))
+          (data as any[]).map((c) => {
+            let celebridadSlug = ''
+            let celebridadNombre = ''
+
+            // Defensivo para los tres casos: objeto, array, null
+            if (Array.isArray(c.celebridad)) {
+              if (c.celebridad.length > 0) {
+                celebridadSlug = c.celebridad[0]?.slug ?? ''
+                celebridadNombre = c.celebridad[0]?.nombre ?? ''
+              }
+            } else if (c.celebridad && typeof c.celebridad === 'object') {
+              celebridadSlug = c.celebridad.slug ?? ''
+              celebridadNombre = c.celebridad.nombre ?? ''
+            }
+
+            return {
+              id: c.id,
+              contenido: c.contenido,
+              username: c.username,
+              fecha: c.fecha,
+              celebridad_slug: celebridadSlug,
+              celebridad_nombre: celebridadNombre,
+            }
+          })
         )
       }
     }
@@ -178,3 +182,6 @@ export default function HomeExtras() {
     </section>
   )
 }
+// Este componente se usa en app/page.tsx para mostrar extras en la home
+// Ejemplo de uso:
+// import HomeExtras from '@/components/HomeExtras'
