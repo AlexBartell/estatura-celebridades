@@ -14,6 +14,17 @@ interface Comentario {
   fecha: string
 }
 
+interface ComentarioDB {
+  id: string
+  contenido: string
+  username: string | null
+  fecha: string
+  celebridad: {
+    slug: string
+    nombre: string
+  } | null
+}
+
 interface CelebridadDestacada {
   id: string
   nombre: string
@@ -56,9 +67,8 @@ export default function HomeExtras() {
         .limit(5)
 
       if (!error && data) {
-        // Mapear la relación
         setComentarios(
-          (data as any[]).map((c) => ({
+          (data as ComentarioDB[]).map((c) => ({
             id: c.id,
             contenido: c.contenido,
             username: c.username,
