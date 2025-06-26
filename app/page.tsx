@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
+import CookieBanner from '@/app/components/CookieBanner'
 
 interface Celebridad {
   id: string
@@ -103,6 +104,7 @@ export default function HomePage() {
           </Link>
         ))}
       </div>
+      <CookieBanner />
     </main>
   )
 }
