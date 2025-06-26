@@ -3,6 +3,15 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import Image from 'next/image'
+
+interface ComentarioDB {
+  id: string
+  contenido: string
+  username: string | null
+  fecha: string
+  celebridad: { slug: string; nombre: string } | { slug: string; nombre: string }[] | null
+}
 
 interface Comentario {
   id: string
@@ -31,7 +40,7 @@ export default function HomeExtras() {
 
   // Últimos comentarios
   const [comentarios, setComentarios] = useState<Comentario[]>([])
-  // Destacados (elige top 3 al azar con votos o lo que quieras)
+  // Destacados
   const [destacadas, setDestacadas] = useState<CelebridadDestacada[]>([])
   // Stats
   const [stats, setStats] = useState<Stats | null>(null)
@@ -56,21 +65,18 @@ export default function HomeExtras() {
 
       if (!error && data) {
         setComentarios(
-          (data as any[]).map((c) => {
+          (data as ComentarioDB[]).map((c) => {
             let celebridadSlug = ''
             let celebridadNombre = ''
-
-            // Defensivo para los tres casos: objeto, array, null
             if (Array.isArray(c.celebridad)) {
               if (c.celebridad.length > 0) {
-                celebridadSlug = c.celebridad[0]?.slug ?? ''
-                celebridadNombre = c.celebridad[0]?.nombre ?? ''
+                celebridadSlug = c.celebridad[0].slug ?? ''
+                celebridadNombre = c.celebridad[0].nombre ?? ''
               }
             } else if (c.celebridad && typeof c.celebridad === 'object') {
               celebridadSlug = c.celebridad.slug ?? ''
               celebridadNombre = c.celebridad.nombre ?? ''
             }
-
             return {
               id: c.id,
               contenido: c.contenido,
@@ -146,10 +152,13 @@ export default function HomeExtras() {
           {destacadas.map((c) => (
             <li key={c.id} className="flex gap-3 items-center">
               {c.foto_url && (
-                <img
+                <Image
                   src={c.foto_url}
                   alt={c.nombre}
+                  width={48}
+                  height={48}
                   className="h-12 w-12 object-cover rounded"
+                  unoptimized // Eliminalo si quieres optimizar en producción
                 />
               )}
               <div>
@@ -182,6 +191,6 @@ export default function HomeExtras() {
     </section>
   )
 }
-// Este componente se usa en app/page.tsx para mostrar extras en la home
-// Ejemplo de uso:
-// import HomeExtras from '@/components/HomeExtras'
+// Este componente se encarga de mostrar los extras en la página de inicio:
+// - Últimos comentarios moderados
+// - Celebridades destacadas por votos  
