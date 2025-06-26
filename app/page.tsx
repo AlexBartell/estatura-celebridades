@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
+import HomeExtras from '@/components/HomeExtras'
 
 interface Celebridad {
   id: string
@@ -120,6 +121,7 @@ export default function HomePage() {
         </div>
       </section>
       {/* CTA final */}
+      <HomeExtras />
       <section className="mt-10 text-center text-sm text-gray-500">
         <span>
           ¿Falta una celebridad?&nbsp;
