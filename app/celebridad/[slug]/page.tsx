@@ -75,7 +75,7 @@ const paisIsoMap: Record<string, string> = {
   francia: 'FR',
   alemania: 'DE',
   inglaterra: 'GB',
-  reino unido: 'GB',
+  reinounido: 'GB',
   portugal: 'PT',
   australia: 'AU',
   rusia: 'RU',
