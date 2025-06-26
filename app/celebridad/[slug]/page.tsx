@@ -36,7 +36,15 @@ export default async function Page({ params }: { params: { slug: string } }) {
     .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial, descripcion, categoria, pais')
     .eq('slug', params.slug)
     .single()
-
+  const { data: recomendados } = await supabase
+    .from('celebridades')
+    .select('id, nombre, slug, foto_url, categoria, pais')
+    .neq('id', celeb.id)
+    .or([
+      celeb.categoria ? `categoria.eq.${celeb.categoria}` : null,
+      celeb.pais ? `pais.eq.${celeb.pais}` : null,
+    ].filter(Boolean).join(','))
+    .limit(6)
   if (error || !celeb) return notFound()
 
   // Genera frase SEO
