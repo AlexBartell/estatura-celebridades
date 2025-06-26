@@ -36,17 +36,20 @@ export default async function Page({ params }: { params: { slug: string } }) {
     .select('id, nombre, slug, foto_url, altura_promedio, altura_oficial, descripcion, categoria, pais')
     .eq('slug', params.slug)
     .single()
-  const { data: recomendados } = await supabase
-    .from('celebridades')
-    .select('id, nombre, slug, foto_url, categoria, pais')
-    .neq('id', celeb.id)
-    .or([
-      celeb.categoria ? `categoria.eq.${celeb.categoria}` : null,
-      celeb.pais ? `pais.eq.${celeb.pais}` : null,
-    ].filter(Boolean).join(','))
-    .limit(6)
+    
+  
   if (error || !celeb) return notFound()
 
+const { data: recomendados } = await supabase
+  .from('celebridades')
+  .select('id, nombre, slug, foto_url, categoria, pais')
+  .neq('id', celeb.id)
+  .or([
+    celeb.categoria ? `categoria.eq.${celeb.categoria}` : null,
+    celeb.pais ? `pais.eq.${celeb.pais}` : null,
+  ].filter(Boolean).join(','))
+  .limit(6)
+  
   // Genera frase SEO
   const title = `¿Cuánto mide ${celeb.nombre}? Altura, país y más`
   const desc = `Descubre la altura real de ${celeb.nombre}${celeb.categoria ? ` (${celeb.categoria})` : ''}${celeb.pais ? ` de ${celeb.pais}` : ''}. La altura de ${celeb.nombre} es de ${celeb.altura_promedio ? `${celeb.altura_promedio} cm` : 'N/A'} según la comunidad. ${celeb.descripcion ? celeb.descripcion.slice(0, 120) : ''}`
