@@ -3,7 +3,7 @@ import VotacionEstatura from '@/app/components/VotacionEstructura'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ComentariosCelebridad from '@/app/components/ComentariosCelebridad'
-
+import Link from 'next/link'
 // Simple función para obtener bandera emoji por país
 function getFlagEmoji(country: string) {
   if (!country) return ''
@@ -201,6 +201,43 @@ const paisBandera = celeb.pais ? getFlagEmoji(
             <div className="bg-white rounded-xl shadow p-5">
               <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
             </div>
+            {recomendados && recomendados.length > 0 && (
+  <section className="bg-white rounded-xl shadow p-5">
+    <h3 className="text-base md:text-lg font-bold text-blue-800 mb-3">
+      {celeb.categoria && celeb.pais
+        ? `Más ${celeb.categoria}s de ${celeb.pais.charAt(0).toUpperCase() + celeb.pais.slice(1)}`
+        : celeb.categoria
+        ? `Más ${celeb.categoria}s`
+        : celeb.pais
+        ? `Más famosos de ${celeb.pais.charAt(0).toUpperCase() + celeb.pais.slice(1)}`
+        : 'Otras celebridades'
+      }
+    </h3>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      {recomendados.map((r) => (
+        <Link
+          key={r.id}
+          href={`/celebridad/${r.slug}`}
+          className="block bg-blue-50 rounded-xl shadow hover:shadow-xl transition p-3 text-center border hover:border-blue-400"
+        >
+          {r.foto_url && (
+            <Image
+              src={r.foto_url}
+              alt={r.nombre}
+              width={80}
+              height={80}
+              className="rounded-full object-cover mx-auto mb-2 border"
+            />
+          )}
+          <div className="font-semibold text-sm text-blue-900">{r.nombre}</div>
+          {r.categoria && (
+            <div className="text-xs text-gray-500">{r.categoria.charAt(0).toUpperCase() + r.categoria.slice(1)}</div>
+          )}
+        </Link>
+      ))}
+    </div>
+  </section>
+)}
           </section>
         </div>
       </main>
