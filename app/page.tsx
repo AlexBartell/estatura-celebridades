@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
-import HomeExtras from '@/components/HomeExtras'
+import HomeExtras from './components/HomeExtras'
 
 interface Celebridad {
   id: string
