@@ -18,41 +18,60 @@ export default async function Page({ params }: { params: { slug: string } }) {
   if (error || !celeb) return notFound()
 
   return (
-    <main className="p-6 max-w-2xl mx-auto space-y-4">
-      <h1 className="text-3xl font-bold">{celeb.nombre}</h1>
-      {celeb.foto_url && (
-        <Image
-          src={celeb.foto_url}
-          alt={celeb.nombre}
-          width={400}
-          height={400}
-          className="w-full max-h-[500px] object-cover rounded"
-        />
-      )}
-      <p className="text-gray-600">
-        <strong>Descripción:</strong>
-      </p>
-      <p className="text-gray-700 mb-4">    
-        {celeb.descripcion || 'No hay descripción disponible.'}</p>
+    <main className="min-h-[80vh] flex flex-col items-center bg-gradient-to-b from-white to-blue-50 px-2">
+      {/* HERO */}
+      <section className="w-full flex flex-col items-center mt-8 mb-5">
+        <div className="bg-white rounded-2xl shadow-xl p-7 flex flex-col items-center w-full max-w-xl">
+          {celeb.foto_url && (
+            <Image
+              src={celeb.foto_url}
+              alt={celeb.nombre}
+              width={200}
+              height={200}
+              className="rounded-full border-4 border-blue-100 shadow mb-4 object-cover"
+              style={{ background: "#f5f8ff" }}
+              priority
+            />
+          )}
+          <h1 className="text-3xl md:text-4xl font-extrabold text-blue-800 mb-2 text-center drop-shadow">
+            {celeb.nombre}
+          </h1>
+          {celeb.altura_promedio && (
+            <p className="text-blue-600 text-lg font-medium mt-1 mb-0.5">
+              Altura promedio: {celeb.altura_promedio} cm
+            </p>
+          )}
+          {celeb.altura_oficial && (
+            <p className="text-gray-600 text-sm">
+              Estatura oficial: {celeb.altura_oficial} cm
+            </p>
+          )}
+        </div>
+      </section>
 
-      <p className="text-gray-700">
-        <strong>Altura promedio por usuarios:</strong>{' '}
-        {celeb.altura_promedio ? `${celeb.altura_promedio} cm` : 'No hay votos aún'}
-      </p>
+      {/* DESCRIPCIÓN */}
+      <section className="w-full max-w-xl">
+        <div className="bg-white rounded-xl shadow p-5 mb-6">
+          <h2 className="font-semibold text-lg text-blue-800 mb-2">Descripción</h2>
+          <p className="text-gray-700 whitespace-pre-line">
+            {celeb.descripcion || 'No hay descripción disponible.'}
+          </p>
+        </div>
+      </section>
 
-      {user ? (
-        <VotacionEstatura celebridadId={celeb.id} userId={user.id} />
-      ) : (
-        <p className="text-sm text-gray-500">Iniciá sesión para votar.</p>
-      )}
+      {/* VOTACIÓN */}
+      <section className="w-full max-w-xl mb-8">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl shadow-sm p-5">
+          <VotacionEstatura celebridadId={celeb.id} userId={user?.id} />
+        </div>
+      </section>
 
-      {celeb.altura_oficial && (
-        <p className="text-gray-500">
-          <strong>Estatura oficial:</strong> {celeb.altura_oficial} cm
-        </p>
-      )}
-
-    <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
+      {/* COMENTARIOS */}
+      <section className="w-full max-w-xl mb-16">
+        <div className="bg-white rounded-xl shadow p-5">
+          <ComentariosCelebridad celebridadId={celeb.id} userId={user?.id} />
+        </div>
+      </section>
     </main>
   )
 }
