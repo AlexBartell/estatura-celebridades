@@ -39,13 +39,88 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const desc = `Descubre la altura real de ${celeb.nombre}${celeb.categoria ? ` (${celeb.categoria})` : ''}${celeb.pais ? ` de ${celeb.pais}` : ''}. La altura de ${celeb.nombre} es de ${celeb.altura_promedio ? `${celeb.altura_promedio} cm` : 'N/A'} según la comunidad. ${celeb.descripcion ? celeb.descripcion.slice(0, 120) : ''}`
 
   // Bandera país, si se puede
-  let paisBandera = celeb.pais ? getFlagEmoji(
-    // Si viene código ISO (ej "AR" o "BR"), OK. Si es nombre, busca ISO.
-    celeb.pais.length === 2 ? celeb.pais : 
-      ({
-        argentina: 'AR', uruguay: 'UY', mexico: 'MX', españa: 'ES', chile: 'CL', brasil: 'BR', venezuela: 'VE', colombia: 'CO', estadosunidos: 'US'
-      }[celeb.pais.toLowerCase().replace(/ /g, '')] || '')
-  ) : ''
+const paisIsoMap: Record<string, string> = {
+  argentina: 'AR',
+  uruguay: 'UY',
+  mexico: 'MX',
+  españa: 'ES',
+  chile: 'CL',
+  brasil: 'BR',
+  venezuela: 'VE',
+  colombia: 'CO',
+  estadosunidos: 'US',
+  puertorico: 'PR',
+  peru: 'PE',
+  ecuador: 'EC',
+  bolivia: 'BO',
+  paraguay: 'PY',
+  cuba: 'CU',
+  dominicana: 'DO',
+  republicadominicana: 'DO',
+  honduras: 'HN',
+  nicaragua: 'NI',
+  guatemala: 'GT',
+  elsalvador: 'SV',
+  panama: 'PA',
+  costarica: 'CR',
+  jamaica: 'JM',
+  trinidadytobago: 'TT',
+  belice: 'BZ',
+  bahamas: 'BS',
+  barbados: 'BB',
+  saintlucia: 'LC',
+  antillasneerlandesas: 'CW',
+  canada: 'CA',
+  italia: 'IT',
+  francia: 'FR',
+  alemania: 'DE',
+  inglaterra: 'GB',
+  reino unido: 'GB',
+  portugal: 'PT',
+  australia: 'AU',
+  rusia: 'RU',
+  china: 'CN',
+  japon: 'JP',
+  corea: 'KR',
+  coreadelsur: 'KR',
+  coreadelnorte: 'KP',
+  india: 'IN',
+  marruecos: 'MA',
+  egipto: 'EG',
+  sudafrica: 'ZA',
+  nigeria: 'NG',
+  suecia: 'SE',
+  noruega: 'NO',
+  finlandia: 'FI',
+  dinamarca: 'DK',
+  holanda: 'NL',
+  paisesbajos: 'NL',
+  polonia: 'PL',
+  suiza: 'CH',
+  austria: 'AT',
+  grecia: 'GR',
+  turquia: 'TR',
+  irlanda: 'IE',
+  escocia: 'GB', // No hay bandera emoji específica
+  gales: 'GB',   // No hay bandera emoji específica
+  croacia: 'HR',
+  serbia: 'RS',
+  eslovenia: 'SI',
+  hungria: 'HU',
+  chequia: 'CZ',
+  eslovaquia: 'SK',
+  islandia: 'IS',
+  filipinas: 'PH',
+  israel: 'IL'
+  // ...puedes agregar más si algún día lo necesitas
+}
+
+// Y luego tu mapping:
+const paisBandera = celeb.pais ? getFlagEmoji(
+  celeb.pais.length === 2
+    ? celeb.pais
+    : (paisIsoMap[celeb.pais.toLowerCase().replace(/ /g, '')] || '')
+) : ''
 
   return (
     <>
