@@ -44,10 +44,8 @@ const { data: recomendados } = await supabase
   .from('celebridades')
   .select('id, nombre, slug, foto_url, categoria, pais')
   .neq('id', celeb.id)
-  .or([
-    celeb.categoria ? `categoria.eq.${celeb.categoria}` : null,
-    celeb.pais ? `pais.eq.${celeb.pais}` : null,
-  ].filter(Boolean).join(','))
+  .eq('categoria', celeb.categoria)
+  .eq('pais', celeb.pais)
   .limit(6)
   
   // Genera frase SEO
