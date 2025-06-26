@@ -7,7 +7,6 @@ import Link from 'next/link'
 interface User {
   email: string
   id: string
-  // Agrega otros campos que quieras mostrar aquí
 }
 
 export default function Header() {
@@ -29,13 +28,17 @@ export default function Header() {
   const cerrarSesion = async () => {
     const supabase  = createClient()
     await supabase.auth.signOut()
-    // Mejor UX: recarga después de cerrar sesión exitosamente
     window.location.href = '/'
   }
 
   return (
     <header className="p-4 bg-gray-100 flex justify-between items-center">
-      <Link href="/" className="font-bold text-xl">Altura de famosos</Link>
+      <nav className="flex gap-4 items-center">
+        <Link href="/" className="font-bold text-xl">Altura de famosos</Link>
+        <Link href="/sugerir" className="text-sm underline text-blue-700 hover:text-blue-900">
+          Sugerir celebridad
+        </Link>
+      </nav>
       {loading ? null : user ? (
         <div className="text-sm flex items-center gap-3">
           <span className="text-gray-800">{user.email}</span>
@@ -57,3 +60,7 @@ export default function Header() {
     </header>
   )
 }
+// app/components/Header.tsx
+// Este componente Header muestra el logo, enlaces de navegación y el estado de sesión del usuario.
+// Si el usuario está autenticado, muestra su email y un botón para cerrar sesión.
+// Si no está autenticado, muestra un enlace para iniciar sesión.
